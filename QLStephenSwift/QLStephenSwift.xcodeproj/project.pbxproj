@@ -1,0 +1,759 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		16D32B2F2EB188AF007D8E56 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16D32B2E2EB188AE007D8E56 /* Quartz.framework */; };
+		16D32B3B2EB188AF007D8E56 /* QLStephenSwiftPreview.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 16D32B2C2EB188AE007D8E56 /* QLStephenSwiftPreview.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		16D32B0C2EB1886E007D8E56 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16D32AF62EB1886D007D8E56 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 16D32AFD2EB1886D007D8E56;
+			remoteInfo = QLStephenSwift;
+		};
+		16D32B162EB1886E007D8E56 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16D32AF62EB1886D007D8E56 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 16D32AFD2EB1886D007D8E56;
+			remoteInfo = QLStephenSwift;
+		};
+		16D32B392EB188AF007D8E56 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16D32AF62EB1886D007D8E56 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 16D32B2B2EB188AE007D8E56;
+			remoteInfo = QLStephenSwiftPreview;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		16D32B402EB188AF007D8E56 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				16D32B3B2EB188AF007D8E56 /* QLStephenSwiftPreview.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		16D32AFE2EB1886D007D8E56 /* QLStephenSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QLStephenSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		16D32B0B2EB1886E007D8E56 /* QLStephenSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QLStephenSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		16D32B152EB1886E007D8E56 /* QLStephenSwiftUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QLStephenSwiftUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		16D32B2C2EB188AE007D8E56 /* QLStephenSwiftPreview.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QLStephenSwiftPreview.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		16D32B2E2EB188AE007D8E56 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		16D32B3C2EB188AF007D8E56 /* Exceptions for "QLStephenSwiftPreview" folder in "QLStephenSwiftPreview" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 16D32B2B2EB188AE007D8E56 /* QLStephenSwiftPreview */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		16D32B002EB1886D007D8E56 /* QLStephenSwift */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = QLStephenSwift;
+			sourceTree = "<group>";
+		};
+		16D32B0E2EB1886E007D8E56 /* QLStephenSwiftTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = QLStephenSwiftTests;
+			sourceTree = "<group>";
+		};
+		16D32B182EB1886E007D8E56 /* QLStephenSwiftUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = QLStephenSwiftUITests;
+			sourceTree = "<group>";
+		};
+		16D32B302EB188AF007D8E56 /* QLStephenSwiftPreview */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				16D32B3C2EB188AF007D8E56 /* Exceptions for "QLStephenSwiftPreview" folder in "QLStephenSwiftPreview" target */,
+			);
+			path = QLStephenSwiftPreview;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		16D32AFB2EB1886D007D8E56 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B082EB1886E007D8E56 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B122EB1886E007D8E56 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B292EB188AE007D8E56 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16D32B2F2EB188AF007D8E56 /* Quartz.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		16D32AF52EB1886D007D8E56 = {
+			isa = PBXGroup;
+			children = (
+				16D32B002EB1886D007D8E56 /* QLStephenSwift */,
+				16D32B0E2EB1886E007D8E56 /* QLStephenSwiftTests */,
+				16D32B182EB1886E007D8E56 /* QLStephenSwiftUITests */,
+				16D32B302EB188AF007D8E56 /* QLStephenSwiftPreview */,
+				16D32B2D2EB188AE007D8E56 /* Frameworks */,
+				16D32AFF2EB1886D007D8E56 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		16D32AFF2EB1886D007D8E56 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				16D32AFE2EB1886D007D8E56 /* QLStephenSwift.app */,
+				16D32B0B2EB1886E007D8E56 /* QLStephenSwiftTests.xctest */,
+				16D32B152EB1886E007D8E56 /* QLStephenSwiftUITests.xctest */,
+				16D32B2C2EB188AE007D8E56 /* QLStephenSwiftPreview.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		16D32B2D2EB188AE007D8E56 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				16D32B2E2EB188AE007D8E56 /* Quartz.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		16D32AFD2EB1886D007D8E56 /* QLStephenSwift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16D32B1F2EB1886E007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwift" */;
+			buildPhases = (
+				16D32AFA2EB1886D007D8E56 /* Sources */,
+				16D32AFB2EB1886D007D8E56 /* Frameworks */,
+				16D32AFC2EB1886D007D8E56 /* Resources */,
+				16D32B402EB188AF007D8E56 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				16D32B3A2EB188AF007D8E56 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				16D32B002EB1886D007D8E56 /* QLStephenSwift */,
+			);
+			name = QLStephenSwift;
+			packageProductDependencies = (
+			);
+			productName = QLStephenSwift;
+			productReference = 16D32AFE2EB1886D007D8E56 /* QLStephenSwift.app */;
+			productType = "com.apple.product-type.application";
+		};
+		16D32B0A2EB1886E007D8E56 /* QLStephenSwiftTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16D32B222EB1886E007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwiftTests" */;
+			buildPhases = (
+				16D32B072EB1886E007D8E56 /* Sources */,
+				16D32B082EB1886E007D8E56 /* Frameworks */,
+				16D32B092EB1886E007D8E56 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				16D32B0D2EB1886E007D8E56 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				16D32B0E2EB1886E007D8E56 /* QLStephenSwiftTests */,
+			);
+			name = QLStephenSwiftTests;
+			packageProductDependencies = (
+			);
+			productName = QLStephenSwiftTests;
+			productReference = 16D32B0B2EB1886E007D8E56 /* QLStephenSwiftTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		16D32B142EB1886E007D8E56 /* QLStephenSwiftUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16D32B252EB1886E007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwiftUITests" */;
+			buildPhases = (
+				16D32B112EB1886E007D8E56 /* Sources */,
+				16D32B122EB1886E007D8E56 /* Frameworks */,
+				16D32B132EB1886E007D8E56 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				16D32B172EB1886E007D8E56 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				16D32B182EB1886E007D8E56 /* QLStephenSwiftUITests */,
+			);
+			name = QLStephenSwiftUITests;
+			packageProductDependencies = (
+			);
+			productName = QLStephenSwiftUITests;
+			productReference = 16D32B152EB1886E007D8E56 /* QLStephenSwiftUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		16D32B2B2EB188AE007D8E56 /* QLStephenSwiftPreview */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16D32B3D2EB188AF007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwiftPreview" */;
+			buildPhases = (
+				16D32B282EB188AE007D8E56 /* Sources */,
+				16D32B292EB188AE007D8E56 /* Frameworks */,
+				16D32B2A2EB188AE007D8E56 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				16D32B302EB188AF007D8E56 /* QLStephenSwiftPreview */,
+			);
+			name = QLStephenSwiftPreview;
+			packageProductDependencies = (
+			);
+			productName = QLStephenSwiftPreview;
+			productReference = 16D32B2C2EB188AE007D8E56 /* QLStephenSwiftPreview.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		16D32AF62EB1886D007D8E56 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					16D32AFD2EB1886D007D8E56 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					16D32B0A2EB1886E007D8E56 = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = 16D32AFD2EB1886D007D8E56;
+					};
+					16D32B142EB1886E007D8E56 = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = 16D32AFD2EB1886D007D8E56;
+					};
+					16D32B2B2EB188AE007D8E56 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+				};
+			};
+			buildConfigurationList = 16D32AF92EB1886D007D8E56 /* Build configuration list for PBXProject "QLStephenSwift" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 16D32AF52EB1886D007D8E56;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 16D32AFF2EB1886D007D8E56 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				16D32AFD2EB1886D007D8E56 /* QLStephenSwift */,
+				16D32B0A2EB1886E007D8E56 /* QLStephenSwiftTests */,
+				16D32B142EB1886E007D8E56 /* QLStephenSwiftUITests */,
+				16D32B2B2EB188AE007D8E56 /* QLStephenSwiftPreview */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		16D32AFC2EB1886D007D8E56 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B092EB1886E007D8E56 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B132EB1886E007D8E56 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B2A2EB188AE007D8E56 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		16D32AFA2EB1886D007D8E56 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B072EB1886E007D8E56 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B112EB1886E007D8E56 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D32B282EB188AE007D8E56 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		16D32B0D2EB1886E007D8E56 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 16D32AFD2EB1886D007D8E56 /* QLStephenSwift */;
+			targetProxy = 16D32B0C2EB1886E007D8E56 /* PBXContainerItemProxy */;
+		};
+		16D32B172EB1886E007D8E56 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 16D32AFD2EB1886D007D8E56 /* QLStephenSwift */;
+			targetProxy = 16D32B162EB1886E007D8E56 /* PBXContainerItemProxy */;
+		};
+		16D32B3A2EB188AF007D8E56 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 16D32B2B2EB188AE007D8E56 /* QLStephenSwiftPreview */;
+			targetProxy = 16D32B392EB188AF007D8E56 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		16D32B1D2EB1886E007D8E56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		16D32B1E2EB1886E007D8E56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		16D32B202EB1886E007D8E56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwift;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		16D32B212EB1886E007D8E56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwift;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		16D32B232EB1886E007D8E56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwiftTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/QLStephenSwift.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/QLStephenSwift";
+			};
+			name = Debug;
+		};
+		16D32B242EB1886E007D8E56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwiftTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/QLStephenSwift.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/QLStephenSwift";
+			};
+			name = Release;
+		};
+		16D32B262EB1886E007D8E56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwiftUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = QLStephenSwift;
+			};
+			name = Debug;
+		};
+		16D32B272EB1886E007D8E56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwiftUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = QLStephenSwift;
+			};
+			name = Release;
+		};
+		16D32B3E2EB188AF007D8E56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QLStephenSwiftPreview/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QLStephenSwiftPreview;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwift.QLStephenSwiftPreview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		16D32B3F2EB188AF007D8E56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BV5C4YNA4Z;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QLStephenSwiftPreview/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QLStephenSwiftPreview;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyCometG3.QLStephenSwift.QLStephenSwiftPreview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		16D32AF92EB1886D007D8E56 /* Build configuration list for PBXProject "QLStephenSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16D32B1D2EB1886E007D8E56 /* Debug */,
+				16D32B1E2EB1886E007D8E56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16D32B1F2EB1886E007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16D32B202EB1886E007D8E56 /* Debug */,
+				16D32B212EB1886E007D8E56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16D32B222EB1886E007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwiftTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16D32B232EB1886E007D8E56 /* Debug */,
+				16D32B242EB1886E007D8E56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16D32B252EB1886E007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwiftUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16D32B262EB1886E007D8E56 /* Debug */,
+				16D32B272EB1886E007D8E56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16D32B3D2EB188AF007D8E56 /* Build configuration list for PBXNativeTarget "QLStephenSwiftPreview" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16D32B3E2EB188AF007D8E56 /* Debug */,
+				16D32B3F2EB188AF007D8E56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 16D32AF62EB1886D007D8E56 /* Project object */;
+}
