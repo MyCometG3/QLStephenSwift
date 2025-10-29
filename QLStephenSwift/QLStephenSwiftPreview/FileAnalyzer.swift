@@ -31,35 +31,37 @@ struct FileAnalyzer {
             throw AnalysisError.cannotReadFile
         }
         
-        guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
-            throw AnalysisError.cannotOpenFile
-        }
-        defer { try? fileHandle.close() }
+        // Determine how much data to read based on file size
+        let shouldReadFull = fileSize <= maxFullReadBytes
+        let dataToAnalyze: Data
         
-        // Read sample for analysis
-        guard let sampleData = try? fileHandle.read(upToCount: maxBytesToCheck),
-              !sampleData.isEmpty else {
-            throw AnalysisError.cannotReadFile
+        if shouldReadFull {
+            // Read entire file for small files
+            guard let fullData = try? Data(contentsOf: fileURL), !fullData.isEmpty else {
+                throw AnalysisError.cannotReadFile
+            }
+            dataToAnalyze = fullData
+        } else {
+            // Read only sample for large files
+            guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
+                throw AnalysisError.cannotOpenFile
+            }
+            defer { try? fileHandle.close() }
+            
+            guard let sampleData = try? fileHandle.read(upToCount: maxBytesToCheck),
+                  !sampleData.isEmpty else {
+                throw AnalysisError.cannotReadFile
+            }
+            dataToAnalyze = sampleData
         }
         
         // Apply cheap binary heuristic first
-        if isBinaryData(sampleData) {
+        if isBinaryData(dataToAnalyze) {
             return .binary
         }
         
-        // Determine how much data to read
-        let shouldReadFull = fileSize <= maxFullReadBytes
-        var dataToAnalyze = sampleData
-        
-        if shouldReadFull && fileSize > sampleData.count {
-            // Read entire file for small files
-            if let fullData = try? Data(contentsOf: fileURL) {
-                dataToAnalyze = fullData
-            }
-        }
-        
         // Detect encoding and decode
-        if let (encoding, text) = detectEncodingAndDecode(data: dataToAnalyze, fullData: shouldReadFull) {
+        if let (encoding, text) = detectEncodingAndDecode(data: dataToAnalyze) {
             return .text(encoding: encoding, string: text)
         }
         
@@ -88,10 +90,8 @@ struct FileAnalyzer {
             // Check for null bytes (strong indicator of binary)
             if byte == 0x00 {
                 suspiciousCount += 1
-            }
-            
-            // Check for control characters (excluding common whitespace)
-            if byte < 0x20 {
+            } else if byte < 0x20 {
+                // Check for control characters (excluding common whitespace)
                 // Allow: TAB(0x09), LF(0x0A), CR(0x0D), FF(0x0C)
                 if byte != 0x09 && byte != 0x0A && byte != 0x0D && byte != 0x0C {
                     suspiciousCount += 1
@@ -104,7 +104,7 @@ struct FileAnalyzer {
         return suspiciousRatio > binaryThreshold
     }
     
-    private static func detectEncodingAndDecode(data: Data, fullData: Bool) -> (String.Encoding, String)? {
+    private static func detectEncodingAndDecode(data: Data) -> (String.Encoding, String)? {
         // 1. Check for BOM (highest priority)
         if let (encoding, bomSize) = detectBOM(data) {
             let dataWithoutBOM = data.dropFirst(bomSize)
@@ -176,8 +176,8 @@ struct FileAnalyzer {
         let encoding = NSString.stringEncoding(
             for: data,
             encodingOptions: [
-                .allowLossyKey: false,
-                .suggestedEncodingsKey: [NSNumber(value: String.Encoding.utf8.rawValue)]
+                .allowLossy: false,
+                .suggestedEncodings: [NSNumber(value: String.Encoding.utf8.rawValue)]
             ],
             convertedString: &convertedString,
             usedLossyConversion: &usedLossyConversion
