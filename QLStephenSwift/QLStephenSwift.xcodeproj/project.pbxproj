@@ -520,7 +520,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -552,7 +552,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -574,7 +574,7 @@
 				DEVELOPMENT_TEAM = BV5C4YNA4Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -595,7 +595,7 @@
 				DEVELOPMENT_TEAM = BV5C4YNA4Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -614,7 +614,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BV5C4YNA4Z;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswiftUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -633,7 +633,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BV5C4YNA4Z;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswiftUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -663,7 +663,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift.qlstephenswiftpreview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -693,7 +693,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 20251029;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift.qlstephenswiftpreview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
