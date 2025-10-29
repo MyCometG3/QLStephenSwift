@@ -8,8 +8,23 @@
 
 import SwiftUI
 
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
+    }
+    
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if let window = sender.windows.first {
+            window.makeKeyAndOrderFront(nil)
+        }
+        return true
+    }
+}
+
 @main
 struct QLStephenSwiftApp: App {
+    
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     init() {
         // Settings migration moved to manual process (see README.md)
@@ -17,9 +32,13 @@ struct QLStephenSwiftApp: App {
     }
     
     var body: some Scene {
-        WindowGroup {
+        Window("QLStephenSwift", id: "main") {
             ContentView()
+                .frame(width: 460, height: 420)
         }
         .windowResizability(.contentSize)
+        .commands {
+            CommandGroup(replacing: .newItem) { }
+        }
     }
 }
