@@ -30,6 +30,26 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 
 ## Installation
 
+### Pre-built Application
+
+1. Download the latest release from [Releases](https://github.com/MyCometG3/QLStephenSwift/releases)
+
+2. Unzip and copy `QLStephenSwift.app` to `/Applications` folder
+
+3. Launch the application once to enable the QuickLook extension
+
+4. Enable the extension in System Settings:
+   - System Settings > Privacy & Security > Extensions > Quick Look
+   - Enable "QLStephenSwift Extension"
+
+5. Reset QuickLook cache:
+   ```bash
+   qlmanage -r
+   qlmanage -r cache
+   ```
+
+6. Restart Finder (hold Option key, right-click Finder icon in Dock, select "Relaunch")
+
 ### Building from Source
 
 1. Clone this repository:
@@ -168,11 +188,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Original [QLStephen](https://github.com/whomwah/qlstephen) by Duncan Robertson
 - Inspired by the need for a modern, Swift-based QuickLook solution
+- Implementation assisted by GitHub Copilot with Claude Sonnet 4.5
 
 ## Authors
 
 **QLStephenSwift**
-- Takashi Mochizuki
+- MyCometG3
 
 **Original QLStephen**
 - Duncan Robertson
