@@ -130,8 +130,7 @@ struct FileAnalyzer {
         }
         
         // 4. Last resort: lossy UTF-8
-        if let text = String(data: data, encoding: .utf8) ?? 
-                      String(bytes: data, encoding: .utf8) {
+        if let text = String(data: data, encoding: .utf8) {
             return (.utf8, text)
         }
         
