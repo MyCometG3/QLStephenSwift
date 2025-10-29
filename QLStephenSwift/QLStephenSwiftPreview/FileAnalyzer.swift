@@ -26,9 +26,8 @@ struct FileAnalyzer {
     
     static func analyzeFile(fileURL: URL) throws -> FileType {
         // Get file size
-        let fileManager = FileManager.default
-        guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
-              let fileSize = attributes[.size] as? Int64 else {
+        let resourceValues = try fileURL.resourceValues(forKeys: [.fileSizeKey])
+        guard let fileSize = resourceValues.fileSize else {
             throw AnalysisError.cannotReadFile
         }
         
