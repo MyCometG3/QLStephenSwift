@@ -100,20 +100,19 @@ struct FileAnalyzer {
     }
     
     private static func detectEncoding(data: Data) -> String.Encoding? {
-        var dataToUse = data
-        
         // 1. Check for BOM (highest priority)
         if let (encoding, bomSize) = detectBOM(data) {
-            dataToUse = Data(data.dropFirst(bomSize))
+            let dataWithoutBOM = Data(data.dropFirst(bomSize))
             // Verify encoding works
-            if String(data: dataToUse, encoding: encoding) != nil {
+            if String(data: dataWithoutBOM, encoding: encoding) != nil {
                 return encoding
             }
+            // BOM detected but decoding failed, try fallback with original data
         }
         
         // 2. Use Foundation/ICU-based encoding detection
-        if let detected = detectEncodingWithICU(dataToUse) {
-            if String(data: dataToUse, encoding: detected) != nil {
+        if let detected = detectEncodingWithICU(data) {
+            if String(data: data, encoding: detected) != nil {
                 return detected
             }
         }
@@ -122,7 +121,7 @@ struct FileAnalyzer {
         let fallbackEncodings: [String.Encoding] = [.utf8, .shiftJIS, .japaneseEUC, .isoLatin1]
         
         for encoding in fallbackEncodings {
-            if String(data: dataToUse, encoding: encoding) != nil {
+            if String(data: data, encoding: encoding) != nil {
                 return encoding
             }
         }
@@ -158,22 +157,19 @@ struct FileAnalyzer {
     }
     
     private static func detectEncodingAndDecode(data: Data) -> (String.Encoding, String)? {
-        var dataToUse = data
-        var detectedEncoding: String.Encoding?
-        
         // 1. Check for BOM (highest priority)
         if let (encoding, bomSize) = detectBOM(data) {
-            dataToUse = Data(data.dropFirst(bomSize))
-            detectedEncoding = encoding
-            if let text = String(data: dataToUse, encoding: encoding) {
+            let dataWithoutBOM = Data(data.dropFirst(bomSize))
+            if let text = String(data: dataWithoutBOM, encoding: encoding) {
                 return (encoding, text)
             }
-            // BOM detected but decoding failed, continue with other methods using data without BOM
+            // BOM detected but decoding failed, try fallback with original data
+            // (keeping BOM in case another encoding can decode it successfully)
         }
         
         // 2. Use Foundation/ICU-based encoding detection
-        if detectedEncoding == nil, let detected = detectEncodingWithICU(dataToUse) {
-            if let text = String(data: dataToUse, encoding: detected) {
+        if let detected = detectEncodingWithICU(data) {
+            if let text = String(data: data, encoding: detected) {
                 return (detected, text)
             }
         }
@@ -182,13 +178,13 @@ struct FileAnalyzer {
         let fallbackEncodings: [String.Encoding] = [.utf8, .shiftJIS, .japaneseEUC, .isoLatin1]
         
         for encoding in fallbackEncodings {
-            if let text = String(data: dataToUse, encoding: encoding) {
+            if let text = String(data: data, encoding: encoding) {
                 return (encoding, text)
             }
         }
         
         // 4. Last resort: lossy UTF-8 using different initializer
-        let text = String(decoding: dataToUse, as: UTF8.self)
+        let text = String(decoding: data, as: UTF8.self)
         return (.utf8, text)
     }
     
