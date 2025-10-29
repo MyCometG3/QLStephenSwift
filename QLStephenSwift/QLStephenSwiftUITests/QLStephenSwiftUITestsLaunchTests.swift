@@ -3,6 +3,7 @@
 //  QLStephenSwiftUITests
 //
 //  Created by Takashi Mochizuki on 2025/10/29.
+//  Copyright © 2025 MyCometG3. All rights reserved.
 //
 
 import XCTest
