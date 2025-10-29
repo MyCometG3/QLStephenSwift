@@ -7,48 +7,81 @@
 
 import Cocoa
 import Quartz
+import UniformTypeIdentifiers
 
 class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     
-
-    /*
-     Use a QLPreviewProvider to provide data-based previews.
-     
-     To set up your extension as a data-based preview extension:
-
-     - Modify the extension's Info.plist by setting
-       <key>QLIsDataBasedPreview</key>
-       <true/>
-     
-     - Add the supported content types to QLSupportedContentTypes array in the extension's Info.plist.
-
-     - Change the NSExtensionPrincipalClass to this class.
-       e.g.
-       <key>NSExtensionPrincipalClass</key>
-       <string>$(PRODUCT_MODULE_NAME).PreviewProvider</string>
-     
-     - Implement providePreview(for:)
-     */
+    private let defaultMaxFileSize = 1024 * 100 // 100KB
     
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
-    
-        //You can create a QLPreviewReply in several ways, depending on the format of the data you want to return.
-        //To return Data of a supported content type:
+        let fileURL = request.fileURL
         
-        let contentType = UTType.plainText // replace with your data type
+        // Ignore .DS_Store files
+        if fileURL.lastPathComponent == ".DS_Store" {
+            throw PreviewError.unsupportedFile
+        }
         
-        let reply = QLPreviewReply.init(dataOfContentType: contentType, contentSize: CGSize.init(width: 800, height: 800)) { (replyToUpdate : QLPreviewReply) in
-
-            let data = Data("Hello world".utf8)
+        // Analyze file to determine if it's text and detect encoding
+        let analysisResult = try FileAnalyzer.analyze(fileURL: fileURL)
+        
+        guard analysisResult.isTextFile else {
+            throw PreviewError.notTextFile
+        }
+        
+        // Get max file size from user defaults
+        let maxFileSize = getMaxFileSize()
+        
+        // Get file size
+        let fileManager = FileManager.default
+        guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
+              let fileSize = attributes[.size] as? Int else {
+            throw PreviewError.cannotReadFile
+        }
+        
+        let contentType = UTType.plainText
+        
+        let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
+            var data: Data
             
-            //setting the stringEncoding for text and html data is optional and defaults to String.Encoding.utf8
-            replyToUpdate.stringEncoding = .utf8
+            if fileSize > maxFileSize {
+                // Read only up to maxFileSize
+                guard let fileHandle = try? FileHandle(forReadingFrom: fileURL),
+                      let limitedData = try? fileHandle.read(upToCount: maxFileSize) else {
+                    return Data()
+                }
+                try? fileHandle.close()
+                data = limitedData
+            } else {
+                // Read entire file
+                guard let fileData = try? Data(contentsOf: fileURL) else {
+                    return Data()
+                }
+                data = fileData
+            }
             
-            //initialize your data here
-            
+            reply.stringEncoding = analysisResult.encoding
             return data
         }
-                
+        
         return reply
     }
+    
+    private func getMaxFileSize() -> Int {
+        let newDomain = "com.mycometg3.qlstephenswift"
+        
+        // Read from new domain using CFPreferences
+        if let maxFileSizeRef = CFPreferencesCopyAppValue("maxFileSize" as CFString, newDomain as CFString),
+           let maxFileSize = maxFileSizeRef as? Int,
+           maxFileSize > 0 {
+            return maxFileSize
+        }
+        
+        return defaultMaxFileSize
+    }
+}
+
+enum PreviewError: Error {
+    case unsupportedFile
+    case notTextFile
+    case cannotReadFile
 }
