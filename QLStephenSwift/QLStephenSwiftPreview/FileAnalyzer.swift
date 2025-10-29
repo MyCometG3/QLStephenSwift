@@ -146,7 +146,7 @@ struct FileAnalyzer {
             return (.utf32BigEndian, 4)
         }
         
-        // UTF-32 LE BOM
+        // UTF-32 LE BOM - must check all 4 bytes before checking UTF-16 LE
         if bytes.count >= 4 && bytes[0] == 0xFF && bytes[1] == 0xFE && bytes[2] == 0x00 && bytes[3] == 0x00 {
             return (.utf32LittleEndian, 4)
         }
@@ -161,8 +161,13 @@ struct FileAnalyzer {
             return (.utf16BigEndian, 2)
         }
         
-        // UTF-16 LE BOM
+        // UTF-16 LE BOM - only if NOT UTF-32 LE
+        // Verify that if we have 4 bytes, bytes[2] and bytes[3] are NOT both 0x00
         if bytes.count >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE {
+            if bytes.count >= 4 && bytes[2] == 0x00 && bytes[3] == 0x00 {
+                // This is actually UTF-32 LE, already handled above
+                return nil
+            }
             return (.utf16LittleEndian, 2)
         }
         
