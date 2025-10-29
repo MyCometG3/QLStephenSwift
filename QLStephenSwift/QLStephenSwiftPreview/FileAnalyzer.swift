@@ -141,7 +141,8 @@ struct FileAnalyzer {
             
             // Check for null bytes (strong indicator of binary)
             if byte == 0x00 {
-                suspiciousCount += 1
+                // Immediate binary detection on null byte
+                return true
             } else if byte < 0x20 {
                 // Check for control characters (excluding common whitespace)
                 // Allow: TAB(0x09), LF(0x0A), CR(0x0D), FF(0x0C)
