@@ -13,6 +13,9 @@ import UniformTypeIdentifiers
 class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     
     private let defaultMaxFileSize = 1024 * 100 // 100KB
+    private let appGroupID = "group.com.mycometg3.qlstephenswift"
+    private let settingsKey = "maxFileSize"
+    private let legacyDomain = "com.mycometg3.qlstephenswift"
     
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
         let fileURL = request.fileURL
@@ -68,20 +71,16 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     }
     
     private func getMaxFileSize() -> Int {
-        let appGroupID = "group.com.mycometg3.qlstephenswift"
-        let key = "maxFileSize"
-        
         // Use App Group shared UserDefaults
         if let sharedDefaults = UserDefaults(suiteName: appGroupID) {
-            let intValue = sharedDefaults.integer(forKey: key)
+            let intValue = sharedDefaults.integer(forKey: settingsKey)
             if intValue > 0 {
                 return intValue
             }
         }
         
         // Legacy fallback: Try CFPreferences (for migration)
-        let legacyDomain = "com.mycometg3.qlstephenswift"
-        let maxFileSizeRef = CFPreferencesCopyAppValue(key as CFString, legacyDomain as CFString)
+        let maxFileSizeRef = CFPreferencesCopyAppValue(settingsKey as CFString, legacyDomain as CFString)
         
         if let maxFileSize = maxFileSizeRef as? Int, maxFileSize > 0 {
             return maxFileSize
@@ -89,7 +88,7 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             return maxFileSize.intValue
         }
         
-        return self.defaultMaxFileSize
+        return defaultMaxFileSize
     }
 }
 

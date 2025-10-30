@@ -26,11 +26,6 @@ struct QLStephenSwiftApp: App {
     
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
-    init() {
-        // Settings migration moved to manual process (see README.md)
-        // Automatic migration is not possible due to app sandbox restrictions
-    }
-    
     var body: some Scene {
         Window("QLStephenSwift", id: "main") {
             ContentView()
