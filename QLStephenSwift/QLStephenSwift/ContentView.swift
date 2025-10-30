@@ -97,6 +97,8 @@ struct ContentView: View {
         }
     }
     
+    /// Loads settings from App Group shared UserDefaults
+    /// Also performs one-time migration from legacy storage locations
     private func loadSettings() {
         guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
             return
@@ -114,6 +116,9 @@ struct ContentView: View {
         maxFileSizeKBText = String(maxFileSize / AppConstants.FileSize.bytesPerKB)
     }
     
+    /// Migrates settings from legacy storage locations to App Group shared storage
+    /// This ensures backward compatibility for users upgrading from older versions
+    /// - Parameter sharedDefaults: The App Group shared UserDefaults instance
     private func migrateOldSettings(to sharedDefaults: UserDefaults) {
         let oldKeys = [
             "\(AppConstants.legacyDomain).maxFileSize",
@@ -131,6 +136,8 @@ struct ContentView: View {
         }
     }
     
+    /// Updates the maximum file size setting when user submits the text field
+    /// Validates and clamps the input to allowed range, then saves to shared storage
     private func updateMaxFileSize() {
         if let kb = Int(maxFileSizeKBText) {
             // Clip to valid range

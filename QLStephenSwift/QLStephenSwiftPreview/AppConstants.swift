@@ -8,15 +8,30 @@
 
 import Foundation
 
+/// Shared constants used across the main app and Quick Look extension.
+/// Using App Groups to share settings between sandboxed processes.
 enum AppConstants {
+    /// App Group identifier for sharing UserDefaults between main app and extension
     static let appGroupID = "group.com.mycometg3.qlstephenswift"
+    
+    /// UserDefaults key for storing maximum file size setting
     static let settingsKey = "maxFileSize"
+    
+    /// Legacy domain identifier for backward compatibility with older versions
     static let legacyDomain = "com.mycometg3.qlstephenswift"
     
+    /// File size related constants
     enum FileSize {
+        /// Bytes per kilobyte conversion factor
         static let bytesPerKB = 1024
-        static let defaultMaxBytes = 100 * bytesPerKB  // 100KB
+        
+        /// Default maximum file size for preview (100KB)
+        static let defaultMaxBytes = 100 * bytesPerKB
+        
+        /// Minimum allowed file size in KB for user configuration
         static let minKB = 100
-        static let maxKB = 10240  // 10MB
+        
+        /// Maximum allowed file size in KB for user configuration (10MB)
+        static let maxKB = 10240
     }
 }

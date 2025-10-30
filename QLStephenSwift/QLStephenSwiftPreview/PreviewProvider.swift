@@ -65,6 +65,14 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         return reply
     }
     
+    /// Retrieves the maximum file size setting from shared storage
+    /// 
+    /// Priority order:
+    /// 1. App Group shared UserDefaults (current method)
+    /// 2. CFPreferences from legacy domain (for backward compatibility)
+    /// 3. Default value if no setting found
+    ///
+    /// - Returns: Maximum file size in bytes
     private func getMaxFileSize() -> Int {
         // Use App Group shared UserDefaults
         if let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) {
@@ -90,8 +98,14 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     }
 }
 
+/// Errors that can occur during preview generation
 enum PreviewError: Error {
+    /// File is not supported for preview (e.g., .DS_Store)
     case unsupportedFile
+    
+    /// File is binary and cannot be displayed as text
     case notTextFile
+    
+    /// File could not be read from disk
     case cannotReadFile
 }
