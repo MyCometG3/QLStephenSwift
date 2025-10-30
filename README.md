@@ -18,7 +18,8 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 
 - ✅ Pure Swift implementation using modern QuickLook Extension framework
 - ✅ Automatic text/binary file detection
-- ✅ Multi-encoding support (UTF-8, Shift-JIS, EUC-JP, ISO-Latin1, UTF-16)
+- ✅ Multi-encoding support with BOM detection (UTF-8, UTF-16, UTF-32, Shift-JIS, EUC-JP, ISO-Latin1)
+- ✅ ICU-based encoding detection using Foundation/NSString APIs
 - ✅ Configurable maximum file size limit
 - ✅ macOS 15+ compatible (no external process dependencies)
 - ✅ Excludes binary files and `.DS_Store`
@@ -121,20 +122,22 @@ Simply select any text file without an extension in Finder and press the Space b
 
 ### Text Detection
 
-The extension uses a custom file analyzer that:
-1. Reads the first 8KB of the file
-2. Checks for null bytes (indicates binary)
-3. Analyzes control character ratio (>30% = binary)
-4. Validates text encoding
+The extension uses a custom file analyzer with adaptive reading strategy:
+1. For files ≤5MB: reads entire file for accurate encoding detection
+2. For files >5MB: reads first 8KB to minimize memory usage
+3. Checks for null bytes (indicates binary)
+4. Analyzes control character ratio (>30% threshold = binary)
+5. Validates text encoding with multiple methods
 
 ### Encoding Detection
 
 Automatic encoding detection with the following priority:
-1. UTF-8 BOM detection
-2. UTF-16 BOM detection (Big/Little Endian)
-3. Strict UTF-8 validation
-4. Japanese encodings (EUC-JP, Shift-JIS)
-5. ISO Latin 1 (fallback)
+1. **BOM Detection**: UTF-8, UTF-16 (BE/LE), UTF-32 (BE/LE)
+2. **ICU-based Detection**: Uses Foundation's `NSString.stringEncoding(for:)` with suggested encodings
+3. **Fallback Encodings**: UTF-8, Shift-JIS, EUC-JP, ISO-Latin1 (tried in order)
+4. **Lossy UTF-8**: Last resort with replacement characters for undetected encodings
+
+The implementation properly handles BOM stripping and prevents double I/O operations for optimal performance.
 
 ## Differences from Original QLStephen
 
