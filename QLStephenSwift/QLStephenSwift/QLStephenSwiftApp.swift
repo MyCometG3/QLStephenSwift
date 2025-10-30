@@ -8,11 +8,14 @@
 
 import SwiftUI
 
+/// Application delegate to handle macOS app lifecycle events
 class AppDelegate: NSObject, NSApplicationDelegate {
+    /// Ensures the app quits when the last window is closed
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
     }
     
+    /// Brings the app window to front when dock icon is clicked
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if let window = sender.windows.first {
             window.makeKeyAndOrderFront(nil)
@@ -25,11 +28,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 struct QLStephenSwiftApp: App {
     
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-    init() {
-        // Settings migration moved to manual process (see README.md)
-        // Automatic migration is not possible due to app sandbox restrictions
-    }
     
     var body: some Scene {
         Window("QLStephenSwift", id: "main") {

@@ -12,8 +12,6 @@ import UniformTypeIdentifiers
 
 class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     
-    private let defaultMaxFileSize = 1024 * 100 // 100KB
-    
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
         let fileURL = request.fileURL
         
@@ -67,22 +65,47 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         return reply
     }
     
+    /// Retrieves the maximum file size setting from shared storage
+    /// 
+    /// Priority order:
+    /// 1. App Group shared UserDefaults (current method)
+    /// 2. CFPreferences from legacy domain (for backward compatibility)
+    /// 3. Default value if no setting found
+    ///
+    /// - Returns: Maximum file size in bytes
     private func getMaxFileSize() -> Int {
-        let newDomain = "com.mycometg3.qlstephenswift"
-        
-        // Read from new domain using CFPreferences
-        if let maxFileSizeRef = CFPreferencesCopyAppValue("maxFileSize" as CFString, newDomain as CFString),
-           let maxFileSize = maxFileSizeRef as? Int,
-           maxFileSize > 0 {
-            return maxFileSize
+        // Use App Group shared UserDefaults
+        if let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) {
+            let intValue = sharedDefaults.integer(forKey: AppConstants.settingsKey)
+            if intValue > 0 {
+                return intValue
+            }
         }
         
-        return defaultMaxFileSize
+        // Legacy fallback: Try CFPreferences (for migration)
+        let maxFileSizeRef = CFPreferencesCopyAppValue(
+            AppConstants.settingsKey as CFString,
+            AppConstants.legacyDomain as CFString
+        )
+        
+        if let maxFileSize = maxFileSizeRef as? Int, maxFileSize > 0 {
+            return maxFileSize
+        } else if let maxFileSize = maxFileSizeRef as? NSNumber, maxFileSize.intValue > 0 {
+            return maxFileSize.intValue
+        }
+        
+        return AppConstants.FileSize.defaultMaxBytes
     }
 }
 
+/// Errors that can occur during preview generation
 enum PreviewError: Error {
+    /// File is not supported for preview (e.g., .DS_Store)
     case unsupportedFile
+    
+    /// File is binary and cannot be displayed as text
     case notTextFile
+    
+    /// File could not be read from disk
     case cannotReadFile
 }
