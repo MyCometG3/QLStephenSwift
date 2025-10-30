@@ -13,6 +13,25 @@ struct FileAnalyzer {
     private static let maxFullReadBytes = 5 * 1024 * 1024 // 5MB threshold for full file read
     private static let binaryThreshold = 0.3 // 30% threshold for binary detection
     
+    // Default encoding suggestion array for ICU detection
+    // Can be customized via the suggestedEncodings parameter in detection methods
+    private static let defaultSuggestedEncodings: [String.Encoding] = [
+        .utf8,
+        .utf16LittleEndian,
+        .utf16BigEndian,
+        .utf32LittleEndian,
+        .utf32BigEndian
+    ]
+    
+    // Default fallback encoding array
+    // These are tried in order if BOM and ICU detection fail
+    private static let defaultFallbackEncodings: [String.Encoding] = [
+        .utf8,
+        .shiftJIS,
+        .japaneseEUC,
+        .isoLatin1
+    ]
+    
     enum FileType {
         case text(encoding: String.Encoding, string: String)
         case binary
@@ -92,19 +111,17 @@ struct FileAnalyzer {
         }
         
         // Detect encoding without decoding full text
-        if let encoding = detectEncoding(data: sampleData) {
-            return AnalysisResult(isTextFile: true, encoding: encoding, mimeType: "text/plain")
-        }
-        
-        return AnalysisResult(isTextFile: false, encoding: .utf8, mimeType: "application/octet-stream")
+        let encoding = detectEncoding(data: sampleData)
+        return AnalysisResult(isTextFile: true, encoding: encoding, mimeType: "text/plain")
     }
     
-    private static func detectEncoding(data: Data) -> String.Encoding? {
+    private static func detectEncoding(data: Data, suggestedEncodings: [String.Encoding]? = nil, fallbackEncodings: [String.Encoding]? = nil) -> String.Encoding {
         // Reuse the encoding detection logic from detectEncodingAndDecode
         // This avoids code duplication while keeping the API surface appropriate
-        if let (encoding, _) = detectEncodingAndDecode(data: data) {
+        if let (encoding, _) = detectEncodingAndDecode(data: data, suggestedEncodings: suggestedEncodings, fallbackEncodings: fallbackEncodings) {
             return encoding
         }
+        // This should never happen as detectEncodingAndDecode always returns something
         return .utf8
     }
     
@@ -142,7 +159,10 @@ struct FileAnalyzer {
         return suspiciousRatio > binaryThreshold
     }
     
-    private static func detectEncodingAndDecode(data: Data) -> (String.Encoding, String)? {
+    private static func detectEncodingAndDecode(data: Data, suggestedEncodings: [String.Encoding]? = nil, fallbackEncodings: [String.Encoding]? = nil) -> (String.Encoding, String)? {
+        let suggested = suggestedEncodings ?? defaultSuggestedEncodings
+        let fallbacks = fallbackEncodings ?? defaultFallbackEncodings
+        
         // 1. Check for BOM (highest priority)
         if let (encoding, bomSize) = detectBOM(data) {
             let dataWithoutBOM = Data(data.dropFirst(bomSize))
@@ -154,16 +174,14 @@ struct FileAnalyzer {
         }
         
         // 2. Use Foundation/ICU-based encoding detection
-        if let detected = detectEncodingWithICU(data) {
+        if let detected = detectEncodingWithICU(data, suggestedEncodings: suggested) {
             if let text = String(data: data, encoding: detected) {
                 return (detected, text)
             }
         }
         
         // 3. Fallback with priority order
-        let fallbackEncodings: [String.Encoding] = [.utf8, .shiftJIS, .japaneseEUC, .isoLatin1]
-        
-        for encoding in fallbackEncodings {
+        for encoding in fallbacks {
             if let text = String(data: data, encoding: encoding) {
                 return (encoding, text)
             }
@@ -211,15 +229,18 @@ struct FileAnalyzer {
         return nil
     }
     
-    private static func detectEncodingWithICU(_ data: Data) -> String.Encoding? {
+    private static func detectEncodingWithICU(_ data: Data, suggestedEncodings: [String.Encoding]) -> String.Encoding? {
         var convertedString: NSString?
         var usedLossyConversion: ObjCBool = false
+        
+        // Convert String.Encoding array to NSNumber array for ICU
+        let suggestedEncodingNumbers = suggestedEncodings.map { NSNumber(value: $0.rawValue) }
         
         let encoding = NSString.stringEncoding(
             for: data,
             encodingOptions: [
                 .allowLossy: false,
-                .suggestedEncodings: [NSNumber(value: String.Encoding.utf8.rawValue)]
+                .suggestedEncodings: suggestedEncodingNumbers
             ],
             convertedString: &convertedString,
             usedLossyConversion: &usedLossyConversion
