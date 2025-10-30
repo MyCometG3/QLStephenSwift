@@ -68,16 +68,28 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     }
     
     private func getMaxFileSize() -> Int {
-        let newDomain = "com.mycometg3.qlstephenswift"
+        let appGroupID = "group.com.mycometg3.qlstephenswift"
+        let key = "maxFileSize"
         
-        // Read from new domain using CFPreferences
-        if let maxFileSizeRef = CFPreferencesCopyAppValue("maxFileSize" as CFString, newDomain as CFString),
-           let maxFileSize = maxFileSizeRef as? Int,
-           maxFileSize > 0 {
-            return maxFileSize
+        // Use App Group shared UserDefaults
+        if let sharedDefaults = UserDefaults(suiteName: appGroupID) {
+            let intValue = sharedDefaults.integer(forKey: key)
+            if intValue > 0 {
+                return intValue
+            }
         }
         
-        return defaultMaxFileSize
+        // Legacy fallback: Try CFPreferences (for migration)
+        let legacyDomain = "com.mycometg3.qlstephenswift"
+        let maxFileSizeRef = CFPreferencesCopyAppValue(key as CFString, legacyDomain as CFString)
+        
+        if let maxFileSize = maxFileSizeRef as? Int, maxFileSize > 0 {
+            return maxFileSize
+        } else if let maxFileSize = maxFileSizeRef as? NSNumber, maxFileSize.intValue > 0 {
+            return maxFileSize.intValue
+        }
+        
+        return self.defaultMaxFileSize
     }
 }
 
