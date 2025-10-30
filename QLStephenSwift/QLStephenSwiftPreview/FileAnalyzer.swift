@@ -10,6 +10,32 @@ import Foundation
 
 struct FileAnalyzer {
     private static let maxBytesToCheck = 8192 // 8KB for initial analysis
+    private static let maxFullReadBytes = 5 * 1024 * 1024 // 5MB threshold for full file read
+    private static let binaryThreshold = 0.3 // 30% threshold for binary detection
+    
+    // Default encoding suggestion array for ICU detection
+    // Can be customized via the suggestedEncodings parameter in detection methods
+    private static let defaultSuggestedEncodings: [String.Encoding] = [
+        .utf8,
+        .utf16LittleEndian,
+        .utf16BigEndian,
+        .utf32LittleEndian,
+        .utf32BigEndian
+    ]
+    
+    // Default fallback encoding array
+    // These are tried in order if BOM and ICU detection fail
+    private static let defaultFallbackEncodings: [String.Encoding] = [
+        .utf8,
+        .shiftJIS,
+        .japaneseEUC,
+        .isoLatin1
+    ]
+    
+    enum FileType {
+        case text(encoding: String.Encoding, string: String)
+        case binary
+    }
     
     struct AnalysisResult {
         let isTextFile: Bool
@@ -17,151 +43,213 @@ struct FileAnalyzer {
         let mimeType: String
     }
     
+    static func analyzeFile(fileURL: URL) throws -> FileType {
+        // Get file size
+        let fileSize = try getFileSize(for: fileURL)
+        
+        // Determine how much data to read based on file size
+        // Note: For files ≤5MB, entire file is loaded into memory to ensure accurate
+        // encoding detection and complete text decoding. For larger files, only the
+        // first 8KB is read to minimize memory usage. This trades memory for accuracy.
+        let shouldReadFull = fileSize <= maxFullReadBytes
+        let dataToAnalyze: Data
+        
+        if shouldReadFull {
+            // Read entire file for small files (≤5MB)
+            // Memory impact: Up to 5MB per file. QuickLook typically processes one file
+            // at a time, so concurrent memory pressure is minimal.
+            guard let fullData = try? Data(contentsOf: fileURL), !fullData.isEmpty else {
+                throw AnalysisError.cannotReadFile
+            }
+            dataToAnalyze = fullData
+        } else {
+            // Read only sample for large files (>5MB)
+            // Memory impact: Fixed 8KB per file regardless of file size
+            guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
+                throw AnalysisError.cannotOpenFile
+            }
+            defer { try? fileHandle.close() }
+            
+            guard let sampleData = try? fileHandle.read(upToCount: maxBytesToCheck),
+                  !sampleData.isEmpty else {
+                throw AnalysisError.cannotReadFile
+            }
+            dataToAnalyze = sampleData
+        }
+        
+        // Apply cheap binary heuristic first
+        if isBinaryData(dataToAnalyze) {
+            return .binary
+        }
+        
+        // Detect encoding and decode
+        if let (encoding, text) = detectEncodingAndDecode(data: dataToAnalyze) {
+            return .text(encoding: encoding, string: text)
+        }
+        
+        return .binary
+    }
+    
     static func analyze(fileURL: URL) throws -> AnalysisResult {
+        // Get file size
+        // For encoding detection, we only need a sample
         guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
             throw AnalysisError.cannotOpenFile
         }
         defer { try? fileHandle.close() }
         
-        // Read initial bytes for analysis
-        guard let data = try? fileHandle.read(upToCount: maxBytesToCheck),
-              !data.isEmpty else {
+        guard let sampleData = try? fileHandle.read(upToCount: maxBytesToCheck),
+              !sampleData.isEmpty else {
             throw AnalysisError.cannotReadFile
         }
         
-        // Check if it's a text file
-        guard isTextData(data) else {
+        // Apply cheap binary heuristic first
+        if isBinaryData(sampleData) {
             return AnalysisResult(isTextFile: false, encoding: .utf8, mimeType: "application/octet-stream")
         }
         
-        // Detect encoding
-        let encoding = detectEncoding(data)
-        
+        // Detect encoding without decoding full text
+        let encoding = detectEncoding(data: sampleData)
         return AnalysisResult(isTextFile: true, encoding: encoding, mimeType: "text/plain")
     }
     
-    private static func isTextData(_ data: Data) -> Bool {
+    private static func detectEncoding(data: Data, suggestedEncodings: [String.Encoding]? = nil, fallbackEncodings: [String.Encoding]? = nil) -> String.Encoding {
+        // Reuse the encoding detection logic from detectEncodingAndDecode
+        // This avoids code duplication while keeping the API surface appropriate
+        if let (encoding, _) = detectEncodingAndDecode(data: data, suggestedEncodings: suggestedEncodings, fallbackEncodings: fallbackEncodings) {
+            return encoding
+        }
+        // This should never happen as detectEncodingAndDecode always returns something
+        return .utf8
+    }
+    
+    private static func getFileSize(for fileURL: URL) throws -> Int {
+        let resourceValues = try fileURL.resourceValues(forKeys: [.fileSizeKey])
+        guard let fileSize = resourceValues.fileSize else {
+            throw AnalysisError.cannotReadFile
+        }
+        return fileSize
+    }
+    
+    private static func isBinaryData(_ data: Data) -> Bool {
         let bytes = [UInt8](data)
-        var controlCharCount = 0
-        var nullByteCount = 0
-        let checkLength = min(bytes.count, 512)
+        var suspiciousCount = 0
+        let checkLength = min(bytes.count, maxBytesToCheck)
         
         for i in 0..<checkLength {
             let byte = bytes[i]
             
             // Check for null bytes (strong indicator of binary)
             if byte == 0x00 {
-                nullByteCount += 1
-                if nullByteCount > 0 {
-                    return false
-                }
-            }
-            
-            // Allow common whitespace and printable ASCII
-            if byte < 0x20 {
+                // Immediate binary detection on null byte
+                return true
+            } else if byte < 0x20 {
+                // Check for control characters (excluding common whitespace)
                 // Allow: TAB(0x09), LF(0x0A), CR(0x0D), FF(0x0C)
                 if byte != 0x09 && byte != 0x0A && byte != 0x0D && byte != 0x0C {
-                    controlCharCount += 1
+                    suspiciousCount += 1
                 }
             }
         }
         
-        // If more than 30% are control characters, likely binary
-        let controlRatio = Double(controlCharCount) / Double(checkLength)
-        if controlRatio > 0.3 {
-            return false
-        }
-        
-        return true
+        // If more than threshold are suspicious bytes, likely binary
+        let suspiciousRatio = Double(suspiciousCount) / Double(checkLength)
+        return suspiciousRatio > binaryThreshold
     }
     
-    private static func detectEncoding(_ data: Data) -> String.Encoding {
-        // Check for UTF-8 BOM
-        if data.count >= 3 {
-            let bom = data.prefix(3)
-            if bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF {
-                return .utf8
+    private static func detectEncodingAndDecode(data: Data, suggestedEncodings: [String.Encoding]? = nil, fallbackEncodings: [String.Encoding]? = nil) -> (String.Encoding, String)? {
+        let suggested = suggestedEncodings ?? defaultSuggestedEncodings
+        let fallbacks = fallbackEncodings ?? defaultFallbackEncodings
+        
+        // 1. Check for BOM (highest priority)
+        if let (encoding, bomSize) = detectBOM(data) {
+            let dataWithoutBOM = Data(data.dropFirst(bomSize))
+            if let text = String(data: dataWithoutBOM, encoding: encoding) {
+                return (encoding, text)
+            }
+            // BOM detected but decoding failed, try fallback with original data
+            // (keeping BOM in case another encoding can decode it successfully)
+        }
+        
+        // 2. Use Foundation/ICU-based encoding detection
+        if let detected = detectEncodingWithICU(data, suggestedEncodings: suggested) {
+            if let text = String(data: data, encoding: detected) {
+                return (detected, text)
             }
         }
         
-        // Check for UTF-16 BOM
-        if data.count >= 2 {
-            let bom = data.prefix(2)
-            if bom[0] == 0xFE && bom[1] == 0xFF {
-                return .utf16BigEndian
-            }
-            if bom[0] == 0xFF && bom[1] == 0xFE {
-                return .utf16LittleEndian
+        // 3. Fallback with priority order
+        for encoding in fallbacks {
+            if let text = String(data: data, encoding: encoding) {
+                return (encoding, text)
             }
         }
         
-        // Try to decode as UTF-8 (strict validation)
-        if let str = String(data: data, encoding: .utf8), 
-           isValidUTF8(data) {
-            return .utf8
-        }
-        
-        // Try Japanese encodings before ISO Latin 1
-        // (ISO Latin 1 accepts almost any byte sequence)
-        
-        // Try Japanese EUC
-        if String(data: data, encoding: .japaneseEUC) != nil {
-            return .japaneseEUC
-        }
-        
-        // Try Shift-JIS
-        if String(data: data, encoding: .shiftJIS) != nil {
-            return .shiftJIS
-        }
-        
-        // Try ISO Latin 1 (fallback for many European languages)
-        if String(data: data, encoding: .isoLatin1) != nil {
-            return .isoLatin1
-        }
-        
-        // Default to UTF-8
-        return .utf8
+        // 4. Last resort: lossy UTF-8 using different initializer
+        // Note: String(decoding:as:) performs lossy conversion, replacing invalid
+        // UTF-8 sequences with replacement characters (U+FFFD). This ensures we
+        // always return something, but may produce gibberish for truly binary data
+        // or text in undetected encodings. This should only be reached after the
+        // binary heuristic has already passed, so the data is likely text-like.
+        let text = String(decoding: data, as: UTF8.self)
+        return (.utf8, text)
     }
     
-    private static func isValidUTF8(_ data: Data) -> Bool {
-        let bytes = [UInt8](data)
-        var i = 0
+    private static func detectBOM(_ data: Data) -> (String.Encoding, Int)? {
+        let bytes = [UInt8](data.prefix(4))
         
-        while i < bytes.count {
-            let byte = bytes[i]
-            
-            // Single byte (ASCII)
-            if byte < 0x80 {
-                i += 1
-                continue
-            }
-            
-            // Multi-byte sequence
-            var extraBytes = 0
-            if (byte & 0xE0) == 0xC0 {
-                extraBytes = 1
-            } else if (byte & 0xF0) == 0xE0 {
-                extraBytes = 2
-            } else if (byte & 0xF8) == 0xF0 {
-                extraBytes = 3
-            } else {
-                return false // Invalid UTF-8 start byte
-            }
-            
-            // Check continuation bytes
-            for j in 1...extraBytes {
-                if i + j >= bytes.count {
-                    return false
-                }
-                if (bytes[i + j] & 0xC0) != 0x80 {
-                    return false // Invalid continuation byte
-                }
-            }
-            
-            i += extraBytes + 1
+        // UTF-32 BE BOM
+        if bytes.count >= 4 && bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xFE && bytes[3] == 0xFF {
+            return (.utf32BigEndian, 4)
         }
         
-        return true
+        // UTF-32 LE BOM - must check all 4 bytes before checking UTF-16 LE
+        if bytes.count >= 4 && bytes[0] == 0xFF && bytes[1] == 0xFE && bytes[2] == 0x00 && bytes[3] == 0x00 {
+            return (.utf32LittleEndian, 4)
+        }
+        
+        // UTF-8 BOM
+        if bytes.count >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF {
+            return (.utf8, 3)
+        }
+        
+        // UTF-16 BE BOM
+        if bytes.count >= 2 && bytes[0] == 0xFE && bytes[1] == 0xFF {
+            return (.utf16BigEndian, 2)
+        }
+        
+        // UTF-16 LE BOM
+        // If we have 4 bytes and they match UTF-32 LE pattern, it was already handled above
+        if bytes.count >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE {
+            return (.utf16LittleEndian, 2)
+        }
+        
+        return nil
+    }
+    
+    private static func detectEncodingWithICU(_ data: Data, suggestedEncodings: [String.Encoding]) -> String.Encoding? {
+        var convertedString: NSString?
+        var usedLossyConversion: ObjCBool = false
+        
+        // Convert String.Encoding array to NSNumber array for ICU
+        let suggestedEncodingNumbers = suggestedEncodings.map { NSNumber(value: $0.rawValue) }
+        
+        let encoding = NSString.stringEncoding(
+            for: data,
+            encodingOptions: [
+                .allowLossy: false,
+                .suggestedEncodings: suggestedEncodingNumbers
+            ],
+            convertedString: &convertedString,
+            usedLossyConversion: &usedLossyConversion
+        )
+        
+        // If detection succeeded and conversion was not lossy, use this encoding
+        if encoding != 0 && !usedLossyConversion.boolValue {
+            return String.Encoding(rawValue: encoding)
+        }
+        
+        return nil
     }
 }
 
