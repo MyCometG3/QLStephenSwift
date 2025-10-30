@@ -26,10 +26,7 @@ struct FileAnalyzer {
     
     static func analyzeFile(fileURL: URL) throws -> FileType {
         // Get file size
-        let resourceValues = try fileURL.resourceValues(forKeys: [.fileSizeKey])
-        guard let fileSize = resourceValues.fileSize else {
-            throw AnalysisError.cannotReadFile
-        }
+        let fileSize = try getFileSize(for: fileURL)
         
         // Determine how much data to read based on file size
         // Note: For files ≤5MB, entire file is loaded into memory to ensure accurate
@@ -76,10 +73,7 @@ struct FileAnalyzer {
     
     static func analyze(fileURL: URL) throws -> AnalysisResult {
         // Get file size
-        let resourceValues = try fileURL.resourceValues(forKeys: [.fileSizeKey])
-        guard let fileSize = resourceValues.fileSize else {
-            throw AnalysisError.cannotReadFile
-        }
+        let fileSize = try getFileSize(for: fileURL)
         
         // For encoding detection, we only need a sample
         guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
@@ -112,6 +106,14 @@ struct FileAnalyzer {
             return encoding
         }
         return .utf8
+    }
+    
+    private static func getFileSize(for fileURL: URL) throws -> Int {
+        let resourceValues = try fileURL.resourceValues(forKeys: [.fileSizeKey])
+        guard let fileSize = resourceValues.fileSize else {
+            throw AnalysisError.cannotReadFile
+        }
+        return fileSize
     }
     
     private static func isBinaryData(_ data: Data) -> Bool {
