@@ -77,17 +77,29 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 
 ### Maximum File Size
 
-You can configure the maximum file size for preview (default: 100KB):
+You can configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
 
 ```bash
 defaults write com.mycometg3.qlstephenswift maxFileSize 204800
 ```
 
-(Value is in bytes. Example above sets 200KB limit)
+(Value is in bytes. Example above sets 200KB limit. Valid range: 102400-10485760 bytes)
+
+### Settings Storage
+
+QLStephenSwift uses App Groups to share settings between the main app and QuickLook extension in a sandboxed environment. Settings are automatically migrated from legacy domains when you first launch the app.
 
 ### Migration from Original QLStephen
 
-If you previously used the original QLStephen and had configured `maxFileSize`, you can manually migrate your settings with the following command:
+When you first launch QLStephenSwift, it automatically migrates your `maxFileSize` setting from the original QLStephen (if it exists). The migration happens once and preserves your existing configuration.
+
+If you prefer to manually set the value:
+
+```bash
+defaults write com.mycometg3.qlstephenswift maxFileSize 204800
+```
+
+For manual migration from the original QLStephen:
 
 ```bash
 # Read the old setting
@@ -102,12 +114,6 @@ else
 fi
 ```
 
-Or simply set the value directly in the new domain:
-
-```bash
-defaults write com.mycometg3.qlstephenswift maxFileSize 204800
-```
-
 ## Usage
 
 Simply select any text file without an extension in Finder and press the Space bar to preview it with QuickLook.
@@ -119,6 +125,10 @@ Simply select any text file without an extension in Finder and press the Space b
 - `public.unix-executable` - Unix executable files (displays shell scripts with shebangs)
 
 ## Technical Details
+
+### Settings Management
+
+QLStephenSwift uses App Groups (`group.com.mycometg3.qlstephenswift`) to share settings between the main application and QuickLook extension. This enables both components to access the same configuration in macOS's sandboxed environment. Settings are automatically migrated from legacy storage locations on first launch.
 
 ### Text Detection
 
