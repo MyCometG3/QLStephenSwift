@@ -106,33 +106,11 @@ struct FileAnalyzer {
     }
     
     private static func detectEncoding(data: Data) -> String.Encoding? {
-        // 1. Check for BOM (highest priority)
-        if let (encoding, bomSize) = detectBOM(data) {
-            let dataWithoutBOM = Data(data.dropFirst(bomSize))
-            // Verify encoding works
-            if String(data: dataWithoutBOM, encoding: encoding) != nil {
-                return encoding
-            }
-            // BOM detected but decoding failed, try fallback with original data
+        // Reuse the encoding detection logic from detectEncodingAndDecode
+        // This avoids code duplication while keeping the API surface appropriate
+        if let (encoding, _) = detectEncodingAndDecode(data: data) {
+            return encoding
         }
-        
-        // 2. Use Foundation/ICU-based encoding detection
-        if let detected = detectEncodingWithICU(data) {
-            if String(data: data, encoding: detected) != nil {
-                return detected
-            }
-        }
-        
-        // 3. Fallback with priority order
-        let fallbackEncodings: [String.Encoding] = [.utf8, .shiftJIS, .japaneseEUC, .isoLatin1]
-        
-        for encoding in fallbackEncodings {
-            if String(data: data, encoding: encoding) != nil {
-                return encoding
-            }
-        }
-        
-        // 4. Last resort: UTF-8 (lossy decoding always works)
         return .utf8
     }
     
@@ -190,6 +168,11 @@ struct FileAnalyzer {
         }
         
         // 4. Last resort: lossy UTF-8 using different initializer
+        // Note: String(decoding:as:) performs lossy conversion, replacing invalid
+        // UTF-8 sequences with replacement characters (U+FFFD). This ensures we
+        // always return something, but may produce gibberish for truly binary data
+        // or text in undetected encodings. This should only be reached after the
+        // binary heuristic has already passed, so the data is likely text-like.
         let text = String(decoding: data, as: UTF8.self)
         return (.utf8, text)
     }
