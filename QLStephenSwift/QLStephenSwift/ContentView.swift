@@ -104,22 +104,37 @@ struct ContentView: View {
             return
         }
         
-        // Load from shared settings
+        // Migrate old keys FIRST if present and not already migrated
+        // This ensures correct priority: legacy settings are only used if no App Group setting exists
+        migrateOldSettingsIfNeeded(to: sharedDefaults)
+        
+        // Load from shared settings (after migration)
         let storedValue = sharedDefaults.integer(forKey: AppConstants.settingsKey)
         if storedValue > 0 {
             maxFileSize = storedValue
         }
-        
-        // Migrate old keys if present (preserve existing users' settings)
-        migrateOldSettings(to: sharedDefaults)
         
         maxFileSizeKBText = String(maxFileSize / AppConstants.FileSize.bytesPerKB)
     }
     
     /// Migrates settings from legacy storage locations to App Group shared storage
     /// This ensures backward compatibility for users upgrading from older versions
+    /// Migration only runs once - tracked by a flag in shared UserDefaults
     /// - Parameter sharedDefaults: The App Group shared UserDefaults instance
-    private func migrateOldSettings(to sharedDefaults: UserDefaults) {
+    private func migrateOldSettingsIfNeeded(to sharedDefaults: UserDefaults) {
+        // Check if migration has already been completed
+        let migrationKey = "settingsMigrationCompleted"
+        guard !sharedDefaults.bool(forKey: migrationKey) else {
+            return
+        }
+        
+        // Only migrate if App Group storage is empty
+        guard sharedDefaults.object(forKey: AppConstants.settingsKey) == nil else {
+            // App Group already has a value, mark migration as complete
+            sharedDefaults.set(true, forKey: migrationKey)
+            return
+        }
+        
         let oldKeys = [
             "\(AppConstants.legacyDomain).maxFileSize",
             "maxFileSize"
@@ -134,6 +149,9 @@ struct ContentView: View {
                 break
             }
         }
+        
+        // Mark migration as completed
+        sharedDefaults.set(true, forKey: migrationKey)
     }
     
     /// Updates the maximum file size setting when user submits the text field
