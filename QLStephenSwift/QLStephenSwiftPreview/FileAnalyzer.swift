@@ -237,8 +237,8 @@ struct FileAnalyzer {
         let encoding = NSString.stringEncoding(
             for: data,
             encodingOptions: [
-                .allowLossy: false,
-                .suggestedEncodings: suggestedEncodingNumbers
+                .allowLossyKey: false,
+                .suggestedEncodingsKey: suggestedEncodingNumbers
             ],
             convertedString: &convertedString,
             usedLossyConversion: &usedLossyConversion
