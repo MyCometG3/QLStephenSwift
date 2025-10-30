@@ -92,8 +92,6 @@ struct FileAnalyzer {
     
     static func analyze(fileURL: URL) throws -> AnalysisResult {
         // Get file size
-        let fileSize = try getFileSize(for: fileURL)
-        
         // For encoding detection, we only need a sample
         guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
             throw AnalysisError.cannotOpenFile
