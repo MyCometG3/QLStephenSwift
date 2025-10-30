@@ -9,14 +9,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var maxFileSize: Int = 102400
+    @State private var maxFileSize: Int = AppConstants.FileSize.defaultMaxBytes
     @State private var maxFileSizeKBText: String = ""
-    
-    private let minFileSizeKB = 100
-    private let maxFileSizeKBLimit = 10240  // 10MB
-    
-    private let appGroupID = "group.com.mycometg3.qlstephenswift"
-    private let settingsKey = "maxFileSize"
     
     var body: some View {
         VStack(spacing: 20) {
@@ -63,7 +57,7 @@ struct ContentView: View {
                     .foregroundColor(.secondary)
                     .padding(.leading, 120)
                 
-                Text("Range: \(minFileSizeKB) - \(maxFileSizeKBLimit) KB")
+                Text("Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.leading, 120)
@@ -104,12 +98,12 @@ struct ContentView: View {
     }
     
     private func loadSettings() {
-        guard let sharedDefaults = UserDefaults(suiteName: appGroupID) else {
+        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
             return
         }
         
         // Load from shared settings
-        let storedValue = sharedDefaults.integer(forKey: settingsKey)
+        let storedValue = sharedDefaults.integer(forKey: AppConstants.settingsKey)
         if storedValue > 0 {
             maxFileSize = storedValue
         }
@@ -117,19 +111,19 @@ struct ContentView: View {
         // Migrate old keys if present (preserve existing users' settings)
         migrateOldSettings(to: sharedDefaults)
         
-        maxFileSizeKBText = String(maxFileSize / 1024)
+        maxFileSizeKBText = String(maxFileSize / AppConstants.FileSize.bytesPerKB)
     }
     
     private func migrateOldSettings(to sharedDefaults: UserDefaults) {
         let oldKeys = [
-            "com.mycometg3.qlstephenswift.maxFileSize",
+            "\(AppConstants.legacyDomain).maxFileSize",
             "maxFileSize"
         ]
         let defaults = UserDefaults.standard
         
         for oldKey in oldKeys {
             if let oldValue = defaults.object(forKey: oldKey) as? Int {
-                sharedDefaults.set(oldValue, forKey: settingsKey)
+                sharedDefaults.set(oldValue, forKey: AppConstants.settingsKey)
                 maxFileSize = oldValue
                 defaults.removeObject(forKey: oldKey)
                 break
@@ -140,18 +134,18 @@ struct ContentView: View {
     private func updateMaxFileSize() {
         if let kb = Int(maxFileSizeKBText) {
             // Clip to valid range
-            let clippedKB = min(max(kb, minFileSizeKB), maxFileSizeKBLimit)
-            maxFileSize = clippedKB * 1024
+            let clippedKB = min(max(kb, AppConstants.FileSize.minKB), AppConstants.FileSize.maxKB)
+            maxFileSize = clippedKB * AppConstants.FileSize.bytesPerKB
             maxFileSizeKBText = String(clippedKB)
             
             // Save to shared settings
-            guard let sharedDefaults = UserDefaults(suiteName: appGroupID) else {
+            guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
                 return
             }
-            sharedDefaults.set(maxFileSize, forKey: settingsKey)
+            sharedDefaults.set(maxFileSize, forKey: AppConstants.settingsKey)
         } else {
             // Restore previous value if not a number
-            maxFileSizeKBText = String(maxFileSize / 1024)
+            maxFileSizeKBText = String(maxFileSize / AppConstants.FileSize.bytesPerKB)
         }
     }
 }
