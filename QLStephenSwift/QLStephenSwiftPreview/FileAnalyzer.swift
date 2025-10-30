@@ -32,17 +32,23 @@ struct FileAnalyzer {
         }
         
         // Determine how much data to read based on file size
+        // Note: For files ≤5MB, entire file is loaded into memory to ensure accurate
+        // encoding detection and complete text decoding. For larger files, only the
+        // first 8KB is read to minimize memory usage. This trades memory for accuracy.
         let shouldReadFull = fileSize <= maxFullReadBytes
         let dataToAnalyze: Data
         
         if shouldReadFull {
-            // Read entire file for small files
+            // Read entire file for small files (≤5MB)
+            // Memory impact: Up to 5MB per file. QuickLook typically processes one file
+            // at a time, so concurrent memory pressure is minimal.
             guard let fullData = try? Data(contentsOf: fileURL), !fullData.isEmpty else {
                 throw AnalysisError.cannotReadFile
             }
             dataToAnalyze = fullData
         } else {
-            // Read only sample for large files
+            // Read only sample for large files (>5MB)
+            // Memory impact: Fixed 8KB per file regardless of file size
             guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
                 throw AnalysisError.cannotOpenFile
             }
