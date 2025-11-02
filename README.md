@@ -18,8 +18,12 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 
 - ✅ Pure Swift implementation using modern QuickLook Extension framework
 - ✅ Automatic text/binary file detection
-- ✅ Multi-encoding support with BOM detection (UTF-8, UTF-16, UTF-32, Shift-JIS, EUC-JP, ISO-Latin1)
-- ✅ ICU-based encoding detection using Foundation/NSString APIs
+- ✅ Comprehensive encoding support:
+  - BOM detection (UTF-8, UTF-16, UTF-32 BE/LE)
+  - Strict UTF-8 validation (RFC 3629 compliant)
+  - CJK encodings (Japanese, Korean, Chinese)
+  - Western encodings (Windows-1252, MacRoman)
+- ✅ Intelligent encoding detection with priority-based fallback
 - ✅ Configurable maximum file size limit
 - ✅ macOS 15+ compatible (no external process dependencies)
 - ✅ Excludes binary files and `.DS_Store`
@@ -34,84 +38,50 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 ### Pre-built Application
 
 1. Download the latest release from [Releases](https://github.com/MyCometG3/QLStephenSwift/releases)
-
 2. Unzip and copy `QLStephenSwift.app` to `/Applications` folder
-
-3. Launch the application once to enable the QuickLook extension
-
-4. Enable the extension in System Settings:
-   - System Settings > Privacy & Security > Extensions > Quick Look
-   - Enable "QLStephenSwift Extension"
-
-5. Reset QuickLook cache:
-   ```bash
-   qlmanage -r
-   qlmanage -r cache
-   ```
-
-6. Restart Finder (hold Option key, right-click Finder icon in Dock, select "Relaunch")
+3. Launch the application once to register the QuickLook extension
 
 ### Building from Source
 
-1. Clone this repository:
+1. Clone and build:
    ```bash
    git clone https://github.com/MyCometG3/QLStephenSwift.git
    cd QLStephenSwift
+   open QLStephenSwift/QLStephenSwift.xcodeproj
    ```
+2. Build and run the project (⌘R)
 
-2. Open `QLStephenSwift/QLStephenSwift.xcodeproj` in Xcode
+### Activation (Required for both methods)
 
-3. Build and run the project (⌘R)
+1. Enable the extension in System Settings:
+   - **System Settings → Privacy & Security → Extensions → Quick Look**
+   - Enable "QLStephenSwift Extension"
 
-4. The QuickLook extension will be automatically enabled
-
-5. Reset QuickLook cache:
+2. Reset QuickLook cache and restart Finder:
    ```bash
-   qlmanage -r
-   qlmanage -r cache
+   qlmanage -r && qlmanage -r cache
+   killall Finder
    ```
-
-6. Restart Finder (hold Option key, right-click Finder icon in Dock, select "Relaunch")
 
 ## Configuration
 
 ### Maximum File Size
 
-You can configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
+Configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
 
 ```bash
-defaults write com.mycometg3.qlstephenswift maxFileSize 204800
+defaults write com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
 ```
 
-(Value is in bytes. Example above sets 200KB limit. Valid range: 102400-10485760 bytes)
-
-### Settings Storage
-
-QLStephenSwift uses App Groups to share settings between the main app and QuickLook extension in a sandboxed environment. Settings are automatically migrated from legacy domains when you first launch the app.
+Valid range: 102400-10485760 bytes (100KB-10MB)
 
 ### Migration from Original QLStephen
 
-When you first launch QLStephenSwift, it automatically migrates your `maxFileSize` setting from the original QLStephen (if it exists). The migration happens once and preserves your existing configuration.
-
-If you prefer to manually set the value:
+Settings are automatically migrated from the original QLStephen on first launch. For manual migration:
 
 ```bash
-defaults write com.mycometg3.qlstephenswift maxFileSize 204800
-```
-
-For manual migration from the original QLStephen:
-
-```bash
-# Read the old setting
 OLD_SIZE=$(defaults read com.whomwah.quicklookstephen maxFileSize 2>/dev/null)
-
-# If old setting exists, copy it to new domain
-if [ ! -z "$OLD_SIZE" ]; then
-  defaults write com.mycometg3.qlstephenswift maxFileSize -int $OLD_SIZE
-  echo "✅ Migrated maxFileSize: $OLD_SIZE"
-else
-  echo "ℹ️  No old settings found"
-fi
+[ -n "$OLD_SIZE" ] && defaults write com.mycometg3.qlstephenswift maxFileSize -int $OLD_SIZE
 ```
 
 ## Usage
@@ -126,68 +96,56 @@ Simply select any text file without an extension in Finder and press the Space b
 
 ## Technical Details
 
-### Settings Management
+### Binary Detection
 
-QLStephenSwift uses App Groups (`group.com.mycometg3.qlstephenswift`) to share settings between the main application and QuickLook extension. This enables both components to access the same configuration in macOS's sandboxed environment. Settings are automatically migrated from legacy storage locations on first launch.
-
-### Text Detection
-
-The extension uses a custom file analyzer with adaptive reading strategy:
-1. For files ≤5MB: reads entire file for accurate encoding detection
-2. For files >5MB: reads first 8KB to minimize memory usage
-3. Checks for null bytes (indicates binary)
-4. Analyzes control character ratio (>30% threshold = binary)
-5. Validates text encoding with multiple methods
+Custom file analyzer with adaptive reading strategy:
+- Files ≤5MB: entire file read for accurate detection
+- Files >5MB: first 8KB sampled to minimize memory usage
+- Null byte detection (instant binary classification)
+- Control character ratio analysis (>30% = binary)
 
 ### Encoding Detection
 
-Automatic encoding detection with the following priority:
-1. **BOM Detection**: UTF-8, UTF-16 (BE/LE), UTF-32 (BE/LE)
-2. **ICU-based Detection**: Uses Foundation's `NSString.stringEncoding(for:)` with suggested encodings
-3. **Fallback Encodings**: UTF-8, Shift-JIS, EUC-JP, ISO-Latin1 (tried in order)
-4. **Lossy UTF-8**: Last resort with replacement characters for undetected encodings
+Multi-stage detection with priority-based fallback to minimize false positives:
 
-The implementation properly handles BOM stripping and prevents double I/O operations for optimal performance.
+1. **BOM Detection** (highest priority)
+   - UTF-8, UTF-16 BE/LE, UTF-32 BE/LE
 
-## Differences from Original QLStephen
+2. **Strict UTF-8 Validation** (RFC 3629 compliant)
+   - Validates byte sequence structure
+   - Rejects overlong encodings and invalid code points
 
-- **No external dependencies**: QLStephenSwift doesn't use `libmagic` or the `file` command (not available in macOS 15+ QuickLook Extensions)
-- **Swift-based**: Complete rewrite in Swift using modern APIs
-- **QuickLook Extension**: Uses the new App Extension architecture instead of legacy QuickLook Plugin
+3. **ICU Statistical Detection**
+   - Uses Foundation's `NSString.stringEncoding(for:)` for heuristic analysis
 
-## Why the Rewrite?
+4. **Priority-based Fallback** (in order of strictness and regional relevance)
+   - Japanese: ISO-2022-JP, EUC-JP, Shift-JIS
+   - Korean: EUC-KR
+   - Chinese: GB18030, Big5, GB2312
+   - Western: Windows-1252, MacRoman
+   - UTF-16/32 BE/LE without BOM (rare, last resort)
 
-The original QLStephen uses the legacy QuickLook Generator plugin format, which:
-- Uses Objective-C and older APIs
-- Relies on the `file` command for MIME type detection
-- May face compatibility issues with newer macOS versions
+5. **Lossy UTF-8** (final fallback)
+   - Replaces invalid sequences with U+FFFD replacement characters
 
-QLStephenSwift addresses these by:
-- Using the modern QuickLook Preview Extension framework
-- Implementing file detection in pure Swift
-- Being compatible with macOS 15+ sandbox restrictions
+## Why QLStephenSwift?
+
+The original QLStephen uses legacy QuickLook Generator plugins with Objective-C and external dependencies (`file` command, `libmagic`). These aren't available in modern macOS sandbox environments.
+
+QLStephenSwift modernizes the approach:
+- ✅ Pure Swift implementation with modern QuickLook Extension framework
+- ✅ No external dependencies (compatible with macOS 15+ sandbox)
+- ✅ Enhanced encoding detection (CJK languages, strict UTF-8 validation)
+- ✅ App Extension architecture for better security and reliability
 
 ## Troubleshooting
 
 ### QuickLook not showing previews
 
-1. Make sure the extension is enabled:
-   - System Settings > Privacy & Security > Extensions > Quick Look
-   - Enable "QLStephenSwift Extension"
-
-2. Reset QuickLook cache:
-   ```bash
-   qlmanage -r
-   qlmanage -r cache
-   ```
-
-3. Restart Finder
-
-### Check which extension handles a file type
-
-```bash
-qlmanage -m | grep public.data
-```
+1. Verify extension is enabled: **System Settings → Privacy & Security → Extensions → Quick Look**
+2. Reset QuickLook: `qlmanage -r && qlmanage -r cache`
+3. Restart Finder: `killall Finder`
+4. Check which extension handles files: `qlmanage -m | grep public.data`
 
 ## Contributing
 
