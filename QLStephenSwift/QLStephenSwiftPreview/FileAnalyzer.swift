@@ -15,22 +15,22 @@ struct FileAnalyzer {
     
     // Default encoding suggestion array for ICU detection
     // Can be customized via the suggestedEncodings parameter in detection methods
-    // Includes common Japanese encodings to improve detection accuracy
+    // ICU performs statistical analysis; we only suggest UTF-8 to guide its heuristics
+    // Other encodings are handled by strict validation or fallback mechanisms
     private static let defaultSuggestedEncodings: [String.Encoding] = [
-        .utf8,
-        .utf16LittleEndian,
-        .utf16BigEndian,
-        .utf32LittleEndian,
-        .utf32BigEndian,
-        .iso2022JP,        // Japanese JIS encoding (ISO-2022-JP)
-        .japaneseEUC,      // Japanese EUC encoding
-        .shiftJIS          // Japanese Shift-JIS encoding
+        .utf8  // UTF-8 only - ICU is effective at detecting UTF-8 patterns
     ]
     
     // Default fallback encoding array
-    // These are tried in order if BOM and ICU detection fail
-    // Ordered by strictness and regional relevance to minimize false positives
-    // Priority: Japanese > Korean > Chinese > Western
+    // These are tried in order if BOM, strict UTF-8, and ICU detection all fail
+    // Ordered by: strictness > regional relevance > rarity
+    // Priority: Japanese > Korean > Chinese > Western > UTF-16/32 without BOM (rare)
+    //
+    // Rationale for UTF-16/32 placement at end:
+    // - UTF-16/32 without BOM are extremely rare in practice
+    // - Early placement risks false positives with ASCII-heavy content
+    // - Statistical detection (ICU) is unreliable for BOM-less UTF-16
+    // - Placing at end ensures other likely encodings are tried first
     private static let defaultFallbackEncodings: [String.Encoding] = [
         .iso2022JP,        // Japanese JIS - highly structured, low false positive rate
         .japaneseEUC,      // Japanese EUC-JP
@@ -40,7 +40,11 @@ struct FileAnalyzer {
         .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),  // Traditional Chinese Big5
         .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_2312_80.rawValue))),  // Chinese GB2312 (legacy)
         .windowsCP1252,    // Western European (Windows)
-        .macOSRoman        // Western European (Mac)
+        .macOSRoman,       // Western European (Mac)
+        .utf16BigEndian,   // UTF-16 BE without BOM (rare, try as last resort)
+        .utf16LittleEndian, // UTF-16 LE without BOM (rare, try as last resort)
+        .utf32BigEndian,   // UTF-32 BE without BOM (extremely rare)
+        .utf32LittleEndian // UTF-32 LE without BOM (extremely rare)
     ]
     
     enum FileType {
@@ -202,22 +206,15 @@ struct FileAnalyzer {
         
         // 4. Fallback with priority order
         // Try encodings in order of strictness and regional relevance
+        // UTF-16/32 without BOM are included at the end of fallback array
+        // This eliminates the need for separate custom UTF-16 detection
         for encoding in fallbacks {
             if let text = String(data: data, encoding: encoding) {
                 return (encoding, text)
             }
         }
         
-        // 5. UTF-16 detection without BOM
-        // Uses byte pattern analysis to detect UTF-16 BE/LE
-        // Placed after fallback to avoid false positives with ASCII-heavy content
-        if let utf16Encoding = detectUTF16WithoutBOM(data) {
-            if let text = String(data: data, encoding: utf16Encoding) {
-                return (utf16Encoding, text)
-            }
-        }
-        
-        // 6. Last resort: lossy UTF-8 using different initializer
+        // 5. Last resort: lossy UTF-8 using different initializer
         // Note: String(decoding:as:) performs lossy conversion, replacing invalid
         // UTF-8 sequences with replacement characters (U+FFFD). This ensures we
         // always return something, but may produce gibberish for truly binary data
@@ -336,55 +333,6 @@ struct FileAnalyzer {
         }
         
         return true
-    }
-    
-    /// Detects UTF-16 encoding without BOM by analyzing byte patterns
-    /// Uses statistical analysis of null byte positions to distinguish BE vs LE
-    /// - Parameter data: Data to analyze
-    /// - Returns: Detected UTF-16 encoding (BE or LE), or nil if inconclusive
-    /// - Note: For ASCII-heavy content, UTF-16 has predictable null byte patterns:
-    ///         BE: nulls at even positions (0x00 0xXX)
-    ///         LE: nulls at odd positions (0xXX 0x00)
-    private static func detectUTF16WithoutBOM(_ data: Data) -> String.Encoding? {
-        // Need at least 4 bytes for meaningful analysis
-        guard data.count >= 4 else { return nil }
-        
-        // Analyze first 1KB or entire data if smaller
-        let bytes = [UInt8](data.prefix(min(data.count, 1024)))
-        var nullAtEvenPositions = 0
-        var nullAtOddPositions = 0
-        let checkLength = min(bytes.count / 2 * 2, 1024) // Ensure even number
-        
-        // Count null bytes at even/odd positions
-        // UTF-16 BE: ASCII chars appear as 0x00 0xXX (null at even index)
-        // UTF-16 LE: ASCII chars appear as 0xXX 0x00 (null at odd index)
-        for i in stride(from: 0, to: checkLength, by: 2) {
-            if bytes[i] == 0x00 { nullAtEvenPositions += 1 }
-            if i + 1 < bytes.count && bytes[i + 1] == 0x00 { nullAtOddPositions += 1 }
-        }
-        
-        // Calculate threshold: 10% of total 16-bit units checked
-        let threshold = checkLength / 20
-        
-        // Strong BE pattern: many nulls at even positions, few at odd positions
-        // Ratio of 2:1 ensures confidence in detection
-        if nullAtEvenPositions > threshold && nullAtEvenPositions > nullAtOddPositions * 2 {
-            // Validate by attempting decode
-            if String(data: data, encoding: .utf16BigEndian) != nil {
-                return .utf16BigEndian
-            }
-        }
-        
-        // Strong LE pattern: many nulls at odd positions, few at even positions
-        if nullAtOddPositions > threshold && nullAtOddPositions > nullAtEvenPositions * 2 {
-            // Validate by attempting decode
-            if String(data: data, encoding: .utf16LittleEndian) != nil {
-                return .utf16LittleEndian
-            }
-        }
-        
-        // Inconclusive: not enough evidence for UTF-16 without BOM
-        return nil
     }
     
     private static func detectBOM(_ data: Data) -> (String.Encoding, Int)? {
