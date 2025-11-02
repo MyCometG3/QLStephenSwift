@@ -98,11 +98,13 @@ Simply select any text file without an extension in Finder and press the Space b
 
 ### Binary Detection
 
-Custom file analyzer with adaptive reading strategy:
-- Files ≤5MB: entire file read for accurate detection
-- Files >5MB: first 8KB sampled to minimize memory usage
-- Null byte detection (instant binary classification)
-- Control character ratio analysis (>30% = binary)
+Adaptive reading strategy based on file size:
+- **Files ≤5MB**: Entire file loaded for encoding detection and complete text decoding
+- **Files >5MB**: First 8KB sampled to minimize memory usage
+
+Binary classification rules (applied to sampled data):
+- **Immediate rejection**: Any null byte (0x00) → classified as binary
+- **Statistical analysis**: Control characters (excluding TAB/LF/CR/FF) > 30% → classified as binary
 
 ### Encoding Detection
 
@@ -116,7 +118,8 @@ Multi-stage detection with priority-based fallback to minimize false positives:
    - Rejects overlong encodings and invalid code points
 
 3. **ICU Statistical Detection**
-   - Uses Foundation's `NSString.stringEncoding(for:)` for heuristic analysis
+   - Uses Foundation's `NSString.stringEncoding(for:)` with UTF-8-only suggestion
+   - Provides additional heuristic-based detection as safety net
 
 4. **Priority-based Fallback** (in order of strictness and regional relevance)
    - Japanese: ISO-2022-JP, EUC-JP, Shift-JIS
