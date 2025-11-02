@@ -173,6 +173,7 @@ struct FileAnalyzer {
         let fallbacks = fallbackEncodings ?? defaultFallbackEncodings
         
         // 1. Check for BOM (highest priority)
+        // BOM provides definitive encoding information
         if let (encoding, bomSize) = detectBOM(data) {
             let dataWithoutBOM = Data(data.dropFirst(bomSize))
             if let text = String(data: dataWithoutBOM, encoding: encoding) {
@@ -182,14 +183,24 @@ struct FileAnalyzer {
             // (keeping BOM in case another encoding can decode it successfully)
         }
         
-        // 2. Use Foundation/ICU-based encoding detection
+        // 2. Strict UTF-8 validation (without BOM)
+        // Performed before ICU detection to ensure high-confidence UTF-8 detection
+        // This prevents false positives from ICU's heuristic-based detection
+        if isStrictUTF8(data) {
+            if let text = String(data: data, encoding: .utf8) {
+                return (.utf8, text)
+            }
+        }
+        
+        // 3. Use Foundation/ICU-based encoding detection
+        // ICU uses statistical analysis and heuristics for encoding detection
         if let detected = detectEncodingWithICU(data, suggestedEncodings: suggested) {
             if let text = String(data: data, encoding: detected) {
                 return (detected, text)
             }
         }
         
-        // 3. Fallback with priority order
+        // 4. Fallback with priority order
         for encoding in fallbacks {
             if let text = String(data: data, encoding: encoding) {
                 return (encoding, text)
@@ -204,6 +215,117 @@ struct FileAnalyzer {
         // binary heuristic has already passed, so the data is likely text-like.
         let text = String(decoding: data, as: UTF8.self)
         return (.utf8, text)
+    }
+    
+    /// Performs strict UTF-8 validation without BOM
+    /// This validates the byte sequence structure according to UTF-8 specification
+    /// - Parameter data: Data to validate
+    /// - Returns: true if data is valid UTF-8 with no encoding errors
+    /// - Note: Rejects overlong encodings, invalid code points (surrogates, out-of-range)
+    private static func isStrictUTF8(_ data: Data) -> Bool {
+        var position = 0
+        let bytes = [UInt8](data)
+        let length = bytes.count
+        
+        while position < length {
+            let byte = bytes[position]
+            
+            // ASCII range (0x00-0x7F) - single byte
+            if byte <= 0x7F {
+                position += 1
+                continue
+            }
+            
+            // Determine sequence length and validate leading byte
+            let sequenceLength: Int
+            let mask: UInt8
+            
+            if (byte & 0b11100000) == 0b11000000 {
+                // 2-byte sequence (110xxxxx)
+                sequenceLength = 2
+                mask = 0b00011111
+            } else if (byte & 0b11110000) == 0b11100000 {
+                // 3-byte sequence (1110xxxx)
+                sequenceLength = 3
+                mask = 0b00001111
+            } else if (byte & 0b11111000) == 0b11110000 {
+                // 4-byte sequence (11110xxx)
+                sequenceLength = 4
+                mask = 0b00000111
+            } else {
+                // Invalid leading byte
+                return false
+            }
+            
+            // Check if we have enough bytes
+            if position + sequenceLength > length {
+                return false
+            }
+            
+            // Validate continuation bytes (10xxxxxx)
+            for i in 1..<sequenceLength {
+                if (bytes[position + i] & 0b11000000) != 0b10000000 {
+                    return false
+                }
+            }
+            
+            // Check for overlong encodings and invalid code points
+            let codePoint = computeUTF8CodePoint(bytes: bytes, start: position, length: sequenceLength, mask: mask)
+            if !isValidUTF8CodePoint(codePoint: codePoint, sequenceLength: sequenceLength) {
+                return false
+            }
+            
+            position += sequenceLength
+        }
+        
+        return true
+    }
+    
+    /// Computes the Unicode code point from a UTF-8 byte sequence
+    /// - Parameters:
+    ///   - bytes: The byte array
+    ///   - start: Starting position of the sequence
+    ///   - length: Length of the sequence (2, 3, or 4 bytes)
+    ///   - mask: Bit mask for the leading byte
+    /// - Returns: The decoded Unicode code point
+    private static func computeUTF8CodePoint(bytes: [UInt8], start: Int, length: Int, mask: UInt8) -> UInt32 {
+        var codePoint = UInt32(bytes[start] & mask)
+        for i in 1..<length {
+            codePoint = (codePoint << 6) | UInt32(bytes[start + i] & 0b00111111)
+        }
+        return codePoint
+    }
+    
+    /// Validates a UTF-8 code point for overlong encodings and invalid ranges
+    /// - Parameters:
+    ///   - codePoint: The code point to validate
+    ///   - sequenceLength: The byte sequence length used to encode it
+    /// - Returns: true if the code point is valid
+    private static func isValidUTF8CodePoint(codePoint: UInt32, sequenceLength: Int) -> Bool {
+        // Check for overlong encodings (using more bytes than necessary)
+        switch sequenceLength {
+        case 2:
+            if codePoint < 0x80 { return false }
+        case 3:
+            if codePoint < 0x800 { return false }
+        case 4:
+            if codePoint < 0x10000 { return false }
+        default:
+            break
+        }
+        
+        // Check for invalid ranges
+        // Surrogate pairs (U+D800 to U+DFFF) - reserved for UTF-16
+        if codePoint >= 0xD800 && codePoint <= 0xDFFF {
+            return false
+        }
+        
+        // Above valid Unicode range (> U+10FFFF)
+        if codePoint > 0x10FFFF {
+            return false
+        }
+        
+        return true
     }
     
     private static func detectBOM(_ data: Data) -> (String.Encoding, Int)? {
