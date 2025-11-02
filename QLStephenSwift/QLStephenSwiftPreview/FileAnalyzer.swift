@@ -15,21 +15,32 @@ struct FileAnalyzer {
     
     // Default encoding suggestion array for ICU detection
     // Can be customized via the suggestedEncodings parameter in detection methods
+    // Includes common Japanese encodings to improve detection accuracy
     private static let defaultSuggestedEncodings: [String.Encoding] = [
         .utf8,
         .utf16LittleEndian,
         .utf16BigEndian,
         .utf32LittleEndian,
-        .utf32BigEndian
+        .utf32BigEndian,
+        .iso2022JP,        // Japanese JIS encoding (ISO-2022-JP)
+        .japaneseEUC,      // Japanese EUC encoding
+        .shiftJIS          // Japanese Shift-JIS encoding
     ]
     
     // Default fallback encoding array
     // These are tried in order if BOM and ICU detection fail
+    // Ordered by strictness and regional relevance to minimize false positives
+    // Priority: Japanese > Korean > Chinese > Western
     private static let defaultFallbackEncodings: [String.Encoding] = [
-        .utf8,
-        .shiftJIS,
-        .japaneseEUC,
-        .isoLatin1
+        .iso2022JP,        // Japanese JIS - highly structured, low false positive rate
+        .japaneseEUC,      // Japanese EUC-JP
+        .shiftJIS,         // Japanese Shift-JIS
+        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.EUC_KR.rawValue))),  // Korean EUC-KR
+        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))),  // Chinese GB18030 (superset of GB2312)
+        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),  // Traditional Chinese Big5
+        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_2312_80.rawValue))),  // Chinese GB2312 (legacy)
+        .windowsCP1252,    // Western European (Windows)
+        .macOSRoman        // Western European (Mac)
     ]
     
     enum FileType {
