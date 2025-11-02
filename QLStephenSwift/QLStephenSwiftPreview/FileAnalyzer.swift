@@ -201,13 +201,23 @@ struct FileAnalyzer {
         }
         
         // 4. Fallback with priority order
+        // Try encodings in order of strictness and regional relevance
         for encoding in fallbacks {
             if let text = String(data: data, encoding: encoding) {
                 return (encoding, text)
             }
         }
         
-        // 4. Last resort: lossy UTF-8 using different initializer
+        // 5. UTF-16 detection without BOM
+        // Uses byte pattern analysis to detect UTF-16 BE/LE
+        // Placed after fallback to avoid false positives with ASCII-heavy content
+        if let utf16Encoding = detectUTF16WithoutBOM(data) {
+            if let text = String(data: data, encoding: utf16Encoding) {
+                return (utf16Encoding, text)
+            }
+        }
+        
+        // 6. Last resort: lossy UTF-8 using different initializer
         // Note: String(decoding:as:) performs lossy conversion, replacing invalid
         // UTF-8 sequences with replacement characters (U+FFFD). This ensures we
         // always return something, but may produce gibberish for truly binary data
@@ -326,6 +336,55 @@ struct FileAnalyzer {
         }
         
         return true
+    }
+    
+    /// Detects UTF-16 encoding without BOM by analyzing byte patterns
+    /// Uses statistical analysis of null byte positions to distinguish BE vs LE
+    /// - Parameter data: Data to analyze
+    /// - Returns: Detected UTF-16 encoding (BE or LE), or nil if inconclusive
+    /// - Note: For ASCII-heavy content, UTF-16 has predictable null byte patterns:
+    ///         BE: nulls at even positions (0x00 0xXX)
+    ///         LE: nulls at odd positions (0xXX 0x00)
+    private static func detectUTF16WithoutBOM(_ data: Data) -> String.Encoding? {
+        // Need at least 4 bytes for meaningful analysis
+        guard data.count >= 4 else { return nil }
+        
+        // Analyze first 1KB or entire data if smaller
+        let bytes = [UInt8](data.prefix(min(data.count, 1024)))
+        var nullAtEvenPositions = 0
+        var nullAtOddPositions = 0
+        let checkLength = min(bytes.count / 2 * 2, 1024) // Ensure even number
+        
+        // Count null bytes at even/odd positions
+        // UTF-16 BE: ASCII chars appear as 0x00 0xXX (null at even index)
+        // UTF-16 LE: ASCII chars appear as 0xXX 0x00 (null at odd index)
+        for i in stride(from: 0, to: checkLength, by: 2) {
+            if bytes[i] == 0x00 { nullAtEvenPositions += 1 }
+            if i + 1 < bytes.count && bytes[i + 1] == 0x00 { nullAtOddPositions += 1 }
+        }
+        
+        // Calculate threshold: 10% of total 16-bit units checked
+        let threshold = checkLength / 20
+        
+        // Strong BE pattern: many nulls at even positions, few at odd positions
+        // Ratio of 2:1 ensures confidence in detection
+        if nullAtEvenPositions > threshold && nullAtEvenPositions > nullAtOddPositions * 2 {
+            // Validate by attempting decode
+            if String(data: data, encoding: .utf16BigEndian) != nil {
+                return .utf16BigEndian
+            }
+        }
+        
+        // Strong LE pattern: many nulls at odd positions, few at even positions
+        if nullAtOddPositions > threshold && nullAtOddPositions > nullAtEvenPositions * 2 {
+            // Validate by attempting decode
+            if String(data: data, encoding: .utf16LittleEndian) != nil {
+                return .utf16LittleEndian
+            }
+        }
+        
+        // Inconclusive: not enough evidence for UTF-16 without BOM
+        return nil
     }
     
     private static func detectBOM(_ data: Data) -> (String.Encoding, Int)? {
