@@ -521,7 +521,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 20251030;
+				MARKETING_VERSION = 20251102;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -554,7 +554,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 20251030;
+				MARKETING_VERSION = 20251102;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -666,7 +666,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 20251030;
+				MARKETING_VERSION = 20251102;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift.qlstephenswiftpreview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -698,7 +698,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 20251030;
+				MARKETING_VERSION = 20251102;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.qlstephenswift.qlstephenswiftpreview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
