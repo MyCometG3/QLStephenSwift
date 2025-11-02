@@ -13,6 +13,12 @@ struct FileAnalyzer {
     private static let maxFullReadBytes = 5 * 1024 * 1024 // 5MB threshold for full file read
     private static let binaryThreshold = 0.3 // 30% threshold for binary detection
     
+    /// Helper function to convert CFStringEncodings to String.Encoding
+    /// Simplifies the verbose CFStringConvertEncodingToNSStringEncoding calls
+    private static func cfEncoding(_ encoding: CFStringEncodings) -> String.Encoding {
+        return String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(encoding.rawValue)))
+    }
+    
     // Default encoding suggestion array for ICU detection
     // Can be customized via the suggestedEncodings parameter in detection methods
     // ICU performs statistical analysis; we only suggest UTF-8 to guide its heuristics
@@ -32,19 +38,19 @@ struct FileAnalyzer {
     // - Statistical detection (ICU) is unreliable for BOM-less UTF-16
     // - Placing at end ensures other likely encodings are tried first
     private static let defaultFallbackEncodings: [String.Encoding] = [
-        .iso2022JP,        // Japanese JIS - highly structured, low false positive rate
-        .japaneseEUC,      // Japanese EUC-JP
-        .shiftJIS,         // Japanese Shift-JIS
-        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.EUC_KR.rawValue))),  // Korean EUC-KR
-        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))),  // Chinese GB18030 (superset of GB2312)
-        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),  // Traditional Chinese Big5
-        .init(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_2312_80.rawValue))),  // Chinese GB2312 (legacy)
-        .windowsCP1252,    // Western European (Windows)
-        .macOSRoman,       // Western European (Mac)
-        .utf16BigEndian,   // UTF-16 BE without BOM (rare, try as last resort)
-        .utf16LittleEndian, // UTF-16 LE without BOM (rare, try as last resort)
-        .utf32BigEndian,   // UTF-32 BE without BOM (extremely rare)
-        .utf32LittleEndian // UTF-32 LE without BOM (extremely rare)
+        .iso2022JP,                 // Japanese JIS - highly structured, low false positive rate
+        .japaneseEUC,               // Japanese EUC-JP
+        .shiftJIS,                  // Japanese Shift-JIS
+        cfEncoding(.EUC_KR),        // Korean EUC-KR
+        cfEncoding(.GB_18030_2000), // Chinese GB18030 (superset of GB2312)
+        cfEncoding(.big5),          // Traditional Chinese Big5
+        cfEncoding(.GB_2312_80),    // Chinese GB2312 (legacy)
+        .windowsCP1252,             // Western European (Windows)
+        .macOSRoman,                // Western European (Mac)
+        .utf16BigEndian,            // UTF-16 BE without BOM (rare, try as last resort)
+        .utf16LittleEndian,         // UTF-16 LE without BOM (rare, try as last resort)
+        .utf32BigEndian,            // UTF-32 BE without BOM (extremely rare)
+        .utf32LittleEndian          // UTF-32 LE without BOM (extremely rare)
     ]
     
     enum FileType {
@@ -147,12 +153,13 @@ struct FileAnalyzer {
     }
     
     private static func isBinaryData(_ data: Data) -> Bool {
-        let bytes = [UInt8](data)
         var suspiciousCount = 0
-        let checkLength = min(bytes.count, maxBytesToCheck)
+        let checkLength = min(data.count, maxBytesToCheck)
         
+        // Use direct Data subscripting to avoid copying entire data to array
+        // This is especially important for large files (up to 5MB)
         for i in 0..<checkLength {
-            let byte = bytes[i]
+            let byte = data[i]
             
             // Check for null bytes (strong indicator of binary)
             if byte == 0x00 {
@@ -231,11 +238,10 @@ struct FileAnalyzer {
     /// - Note: Rejects overlong encodings, invalid code points (surrogates, out-of-range)
     private static func isStrictUTF8(_ data: Data) -> Bool {
         var position = 0
-        let bytes = [UInt8](data)
-        let length = bytes.count
+        let length = data.count
         
         while position < length {
-            let byte = bytes[position]
+            let byte = data[position]
             
             // ASCII range (0x00-0x7F) - single byte
             if byte <= 0x7F {
@@ -271,13 +277,13 @@ struct FileAnalyzer {
             
             // Validate continuation bytes (10xxxxxx)
             for i in 1..<sequenceLength {
-                if (bytes[position + i] & 0b11000000) != 0b10000000 {
+                if (data[position + i] & 0b11000000) != 0b10000000 {
                     return false
                 }
             }
             
             // Check for overlong encodings and invalid code points
-            let codePoint = computeUTF8CodePoint(bytes: bytes, start: position, length: sequenceLength, mask: mask)
+            let codePoint = computeUTF8CodePoint(data: data, start: position, length: sequenceLength, mask: mask)
             if !isValidUTF8CodePoint(codePoint: codePoint, sequenceLength: sequenceLength) {
                 return false
             }
@@ -290,15 +296,15 @@ struct FileAnalyzer {
     
     /// Computes the Unicode code point from a UTF-8 byte sequence
     /// - Parameters:
-    ///   - bytes: The byte array
+    ///   - data: The data containing UTF-8 bytes
     ///   - start: Starting position of the sequence
     ///   - length: Length of the sequence (2, 3, or 4 bytes)
     ///   - mask: Bit mask for the leading byte
     /// - Returns: The decoded Unicode code point
-    private static func computeUTF8CodePoint(bytes: [UInt8], start: Int, length: Int, mask: UInt8) -> UInt32 {
-        var codePoint = UInt32(bytes[start] & mask)
+    private static func computeUTF8CodePoint(data: Data, start: Int, length: Int, mask: UInt8) -> UInt32 {
+        var codePoint = UInt32(data[start] & mask)
         for i in 1..<length {
-            codePoint = (codePoint << 6) | UInt32(bytes[start + i] & 0b00111111)
+            codePoint = (codePoint << 6) | UInt32(data[start + i] & 0b00111111)
         }
         return codePoint
     }
