@@ -86,15 +86,15 @@ final class TextFormatterTests: XCTestCase {
     /// Test that line count is correctly determined
     func testLineCountCalculation() throws {
         let text1 = "line 1"
-        let lines1 = text1.components(separatedBy: .newlines)
+        let lines1 = text1.split(separator: /\r\n|\n|\r/, omittingEmptySubsequences: false)
         XCTAssertEqual(lines1.count, 1)
         
         let text2 = "line 1\nline 2"
-        let lines2 = text2.components(separatedBy: .newlines)
+        let lines2 = text2.split(separator: /\r\n|\n|\r/, omittingEmptySubsequences: false)
         XCTAssertEqual(lines2.count, 2)
         
         let text3 = "line 1\nline 2\nline 3\n"
-        let lines3 = text3.components(separatedBy: .newlines)
+        let lines3 = text3.split(separator: /\r\n|\n|\r/, omittingEmptySubsequences: false)
         // Trailing newline creates an empty last element
         XCTAssertEqual(lines3.count, 4)
     }
