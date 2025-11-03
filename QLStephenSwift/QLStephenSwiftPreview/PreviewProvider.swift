@@ -154,6 +154,8 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             contentFontSize: AppConstants.RTF.defaultContentFontSize,
             contentForegroundColor: AppConstants.RTF.defaultContentForegroundColor,
             contentBackgroundColor: AppConstants.RTF.defaultContentBackgroundColor,
+            contentForegroundColorDark: AppConstants.RTF.defaultContentForegroundColorDark,
+            contentBackgroundColorDark: AppConstants.RTF.defaultContentBackgroundColorDark,
             tabWidthMode: AppConstants.RTF.defaultTabWidthMode,
             tabWidthValue: AppConstants.RTF.defaultTabWidthValue
         )

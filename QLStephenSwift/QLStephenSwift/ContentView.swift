@@ -19,6 +19,16 @@ struct ContentView: View {
     // RTF rendering settings
     @State private var rtfRenderingEnabled: Bool = AppConstants.RTF.defaultEnabled
     
+    // Font customization settings
+    @State private var contentFontName: String = AppConstants.RTF.defaultContentFontName
+    @State private var contentFontSize: CGFloat = AppConstants.RTF.defaultContentFontSize
+    
+    // Color customization settings
+    @State private var contentForegroundColor: Color = Color.black
+    @State private var contentBackgroundColor: Color = Color.white
+    @State private var contentForegroundColorDark: Color = Color(white: 0.875)
+    @State private var contentBackgroundColorDark: Color = Color(white: 0.118)
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -120,7 +130,6 @@ struct ContentView: View {
                         
                         Toggle("", isOn: $rtfRenderingEnabled)
                             .toggleStyle(.switch)
-                            .disabled(!lineNumbersEnabled)
                             .onChange(of: rtfRenderingEnabled) { _, newValue in
                                 saveRTFEnabled(newValue)
                             }
@@ -128,12 +137,124 @@ struct ContentView: View {
                         Spacer()
                     }
                     
-                    Text("RTF mode applies font styles and colors. Advanced font settings can be configured via defaults")
+                    Text("RTF mode applies font styles and colors to text preview")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.leading, 140)
                 }
                 .padding(.horizontal)
+                
+                // Font Customization Settings
+                if rtfRenderingEnabled {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Font Settings")
+                            .font(.headline)
+                        
+                        HStack {
+                            Text("Font Family:")
+                                .frame(width: 140, alignment: .trailing)
+                            
+                            Picker("", selection: $contentFontName) {
+                                ForEach(AppConstants.RTF.availableFonts, id: \.self) { font in
+                                    Text(font).tag(font)
+                                }
+                            }
+                            .frame(width: 140)
+                            .onChange(of: contentFontName) { _, newValue in
+                                saveContentFont(newValue, size: contentFontSize)
+                            }
+                            
+                            Spacer()
+                        }
+                        
+                        HStack {
+                            Text("Font Size:")
+                                .frame(width: 140, alignment: .trailing)
+                            
+                            Slider(value: $contentFontSize, in: AppConstants.RTF.minFontSize...AppConstants.RTF.maxFontSize, step: 1.0)
+                                .frame(width: 200)
+                                .onChange(of: contentFontSize) { _, newValue in
+                                    saveContentFont(contentFontName, size: newValue)
+                                }
+                            
+                            Text("\(Int(contentFontSize)) pt")
+                                .frame(width: 50, alignment: .leading)
+                            
+                            Spacer()
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    // Color Customization Settings
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Color Settings (Light Mode)")
+                            .font(.headline)
+                        
+                        HStack {
+                            Text("Text Color:")
+                                .frame(width: 140, alignment: .trailing)
+                            
+                            ColorPicker("", selection: $contentForegroundColor, supportsOpacity: false)
+                                .labelsHidden()
+                                .onChange(of: contentForegroundColor) { _, newValue in
+                                    saveContentColors()
+                                }
+                            
+                            Spacer()
+                        }
+                        
+                        HStack {
+                            Text("Background Color:")
+                                .frame(width: 140, alignment: .trailing)
+                            
+                            ColorPicker("", selection: $contentBackgroundColor, supportsOpacity: false)
+                                .labelsHidden()
+                                .onChange(of: contentBackgroundColor) { _, newValue in
+                                    saveContentColors()
+                                }
+                            
+                            Spacer()
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Color Settings (Dark Mode)")
+                            .font(.headline)
+                        
+                        HStack {
+                            Text("Text Color:")
+                                .frame(width: 140, alignment: .trailing)
+                            
+                            ColorPicker("", selection: $contentForegroundColorDark, supportsOpacity: false)
+                                .labelsHidden()
+                                .onChange(of: contentForegroundColorDark) { _, newValue in
+                                    saveContentColors()
+                                }
+                            
+                            Spacer()
+                        }
+                        
+                        HStack {
+                            Text("Background Color:")
+                                .frame(width: 140, alignment: .trailing)
+                            
+                            ColorPicker("", selection: $contentBackgroundColorDark, supportsOpacity: false)
+                                .labelsHidden()
+                                .onChange(of: contentBackgroundColorDark) { _, newValue in
+                                    saveContentColors()
+                                }
+                            
+                            Spacer()
+                        }
+                        
+                        Text("Colors automatically adapt based on system appearance")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.leading, 140)
+                    }
+                    .padding(.horizontal)
+                }
                 
                 Divider()
                 
@@ -195,6 +316,25 @@ struct ContentView: View {
         
         // Load RTF rendering settings
         rtfRenderingEnabled = sharedDefaults.bool(forKey: AppConstants.RTF.enabledKey)
+        
+        // Load font settings
+        contentFontName = sharedDefaults.string(forKey: AppConstants.RTF.contentFontNameKey) ?? AppConstants.RTF.defaultContentFontName
+        let fontSizeValue = sharedDefaults.double(forKey: AppConstants.RTF.contentFontSizeKey)
+        contentFontSize = fontSizeValue != 0 ? CGFloat(fontSizeValue) : AppConstants.RTF.defaultContentFontSize
+        
+        // Load color settings
+        if let fgHex = sharedDefaults.string(forKey: AppConstants.RTF.contentForegroundColorKey) {
+            contentForegroundColor = colorFromHex(fgHex) ?? Color.black
+        }
+        if let bgHex = sharedDefaults.string(forKey: AppConstants.RTF.contentBackgroundColorKey) {
+            contentBackgroundColor = colorFromHex(bgHex) ?? Color.white
+        }
+        if let fgDarkHex = sharedDefaults.string(forKey: AppConstants.RTF.contentForegroundColorDarkKey) {
+            contentForegroundColorDark = colorFromHex(fgDarkHex) ?? Color(white: 0.875)
+        }
+        if let bgDarkHex = sharedDefaults.string(forKey: AppConstants.RTF.contentBackgroundColorDarkKey) {
+            contentBackgroundColorDark = colorFromHex(bgDarkHex) ?? Color(white: 0.118)
+        }
     }
     
     /// Migrates settings from legacy storage locations to App Group shared storage
@@ -276,6 +416,66 @@ struct ContentView: View {
             return
         }
         sharedDefaults.set(enabled, forKey: AppConstants.RTF.enabledKey)
+    }
+    
+    /// Saves content font settings to shared storage
+    private func saveContentFont(_ name: String, size: CGFloat) {
+        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
+            return
+        }
+        sharedDefaults.set(name, forKey: AppConstants.RTF.contentFontNameKey)
+        sharedDefaults.set(Double(size), forKey: AppConstants.RTF.contentFontSizeKey)
+    }
+    
+    /// Saves content color settings to shared storage
+    private func saveContentColors() {
+        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
+            return
+        }
+        sharedDefaults.set(colorToHex(contentForegroundColor), forKey: AppConstants.RTF.contentForegroundColorKey)
+        sharedDefaults.set(colorToHex(contentBackgroundColor), forKey: AppConstants.RTF.contentBackgroundColorKey)
+        sharedDefaults.set(colorToHex(contentForegroundColorDark), forKey: AppConstants.RTF.contentForegroundColorDarkKey)
+        sharedDefaults.set(colorToHex(contentBackgroundColorDark), forKey: AppConstants.RTF.contentBackgroundColorDarkKey)
+    }
+    
+    /// Convert SwiftUI Color to hex string
+    private func colorToHex(_ color: Color) -> String {
+        let nsColor = NSColor(color)
+        guard let rgbColor = nsColor.usingColorSpace(.deviceRGB) else {
+            return "#000000"
+        }
+        let r = Int(rgbColor.redComponent * 255)
+        let g = Int(rgbColor.greenComponent * 255)
+        let b = Int(rgbColor.blueComponent * 255)
+        return String(format: "#%02X%02X%02X", r, g, b)
+    }
+    
+    /// Convert hex string to SwiftUI Color
+    private func colorFromHex(_ hex: String) -> Color? {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+        
+        var rgb: UInt64 = 0
+        guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else {
+            return nil
+        }
+        
+        let length = hexSanitized.count
+        let r, g, b: Double
+        
+        if length == 6 {
+            r = Double((rgb & 0xFF0000) >> 16) / 255.0
+            g = Double((rgb & 0x00FF00) >> 8) / 255.0
+            b = Double(rgb & 0x0000FF) / 255.0
+        } else if length == 8 {
+            r = Double((rgb & 0xFF000000) >> 24) / 255.0
+            g = Double((rgb & 0x00FF0000) >> 16) / 255.0
+            b = Double((rgb & 0x0000FF00) >> 8) / 255.0
+        } else {
+            return nil
+        }
+        
+        return Color(red: r, green: g, blue: b)
     }
 }
 

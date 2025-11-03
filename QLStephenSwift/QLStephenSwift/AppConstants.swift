@@ -81,6 +81,10 @@ enum AppConstants {
         static let contentForegroundColorKey = "contentForegroundColor"
         static let contentBackgroundColorKey = "contentBackgroundColor"
         
+        /// Dark mode specific color keys
+        static let contentForegroundColorDarkKey = "contentForegroundColorDark"
+        static let contentBackgroundColorDarkKey = "contentBackgroundColorDark"
+        
         /// Tab width settings keys
         static let tabWidthModeKey = "tabWidthMode"
         static let tabWidthValueKey = "tabWidthValue"
@@ -95,6 +99,23 @@ enum AppConstants {
         static let defaultContentFontSize: CGFloat = 11.0
         static let defaultContentForegroundColor = "#000000" // Black
         static let defaultContentBackgroundColor = "#FFFFFF" // White
+        
+        /// Default dark mode colors
+        static let defaultContentForegroundColorDark = "#E0E0E0" // Light gray text
+        static let defaultContentBackgroundColorDark = "#1E1E1E" // Dark background
+        
+        /// Available monospaced fonts for code display
+        static let availableFonts = [
+            "Menlo",
+            "Monaco",
+            "SF Mono",
+            "Courier New",
+            "Courier"
+        ]
+        
+        /// Font size range
+        static let minFontSize: CGFloat = 8.0
+        static let maxFontSize: CGFloat = 24.0
         
         /// Tab width mode options
         enum TabWidthMode: String {

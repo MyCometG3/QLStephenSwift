@@ -30,6 +30,10 @@ struct TextFormatter {
         let contentForegroundColor: String
         let contentBackgroundColor: String
         
+        // Dark mode content colors
+        let contentForegroundColorDark: String
+        let contentBackgroundColorDark: String
+        
         // Tab width settings
         let tabWidthMode: String
         let tabWidthValue: Double
@@ -58,6 +62,8 @@ struct TextFormatter {
                 contentFontSize: contentFontSize,
                 contentForegroundColor: defaults.string(forKey: AppConstants.RTF.contentForegroundColorKey) ?? AppConstants.RTF.defaultContentForegroundColor,
                 contentBackgroundColor: defaults.string(forKey: AppConstants.RTF.contentBackgroundColorKey) ?? AppConstants.RTF.defaultContentBackgroundColor,
+                contentForegroundColorDark: defaults.string(forKey: AppConstants.RTF.contentForegroundColorDarkKey) ?? AppConstants.RTF.defaultContentForegroundColorDark,
+                contentBackgroundColorDark: defaults.string(forKey: AppConstants.RTF.contentBackgroundColorDarkKey) ?? AppConstants.RTF.defaultContentBackgroundColorDark,
                 tabWidthMode: defaults.string(forKey: AppConstants.RTF.tabWidthModeKey) ?? AppConstants.RTF.defaultTabWidthMode,
                 tabWidthValue: tabWidthValue
             )
@@ -81,9 +87,8 @@ struct TextFormatter {
             return textWithLineNumbers.data(using: .utf8)
         }
         
-        // If RTF is enabled, create attributed string
-        // RTF rendering requires line numbers to be enabled
-        if settings.rtfRenderingEnabled && settings.lineNumbersEnabled {
+        // If RTF is enabled, create attributed string (with or without line numbers)
+        if settings.rtfRenderingEnabled {
             let attributedString = createAttributedString(
                 from: text,
                 settings: settings
@@ -181,11 +186,32 @@ struct TextFormatter {
         let lineNumberFont = NSFont(name: settings.lineNumberFontName, size: settings.lineNumberFontSize) ?? NSFont.monospacedSystemFont(ofSize: settings.lineNumberFontSize, weight: .regular)
         let contentFont = NSFont(name: settings.contentFontName, size: settings.contentFontSize) ?? NSFont.monospacedSystemFont(ofSize: settings.contentFontSize, weight: .regular)
         
-        // Create colors
+        // Create colors with Dark Mode support
         let lineNumberFgColor = colorFromHex(settings.lineNumberForegroundColor) ?? NSColor.gray
         let lineNumberBgColor = colorFromHex(settings.lineNumberBackgroundColor) ?? NSColor.lightGray.withAlphaComponent(0.3)
-        let contentFgColor = colorFromHex(settings.contentForegroundColor) ?? NSColor.black
-        let contentBgColor = colorFromHex(settings.contentBackgroundColor) ?? NSColor.white
+        
+        // Use dynamic colors that adapt to appearance changes
+        let contentFgColorLight = colorFromHex(settings.contentForegroundColor) ?? NSColor.black
+        let contentBgColorLight = colorFromHex(settings.contentBackgroundColor) ?? NSColor.white
+        let contentFgColorDark = colorFromHex(settings.contentForegroundColorDark) ?? NSColor(white: 0.875, alpha: 1.0)
+        let contentBgColorDark = colorFromHex(settings.contentBackgroundColorDark) ?? NSColor(white: 0.118, alpha: 1.0)
+        
+        // Create dynamic colors that automatically switch based on appearance
+        let contentFgColor = NSColor(name: nil) { appearance in
+            if appearance.name == .darkAqua || appearance.name == .vibrantDark || appearance.name == .accessibilityHighContrastDarkAqua || appearance.name == .accessibilityHighContrastVibrantDark {
+                return contentFgColorDark
+            } else {
+                return contentFgColorLight
+            }
+        }
+        
+        let contentBgColor = NSColor(name: nil) { appearance in
+            if appearance.name == .darkAqua || appearance.name == .vibrantDark || appearance.name == .accessibilityHighContrastDarkAqua || appearance.name == .accessibilityHighContrastVibrantDark {
+                return contentBgColorDark
+            } else {
+                return contentBgColorLight
+            }
+        }
         
         // Create paragraph style with tab stops
         let paragraphStyle = NSMutableParagraphStyle()
