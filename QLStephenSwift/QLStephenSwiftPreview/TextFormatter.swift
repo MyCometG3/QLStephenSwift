@@ -109,16 +109,21 @@ struct TextFormatter {
     /// - Parameter text: The text to analyze
     /// - Returns: The detected line ending ("\r\n", "\n", or "\r")
     private static func detectLineEnding(in text: String) -> String {
-        // Check for CRLF first, then LF, then CR (order matters)
-        if text.contains("\r\n") {
-            return "\r\n"
-        } else if text.contains("\n") {
-            return "\n"
-        } else if text.contains("\r") {
-            return "\r"
-        } else {
-            return "\n" // Default to LF for single-line files
+        // Scan text once to find the first line ending
+        for i in text.indices {
+            let char = text[i]
+            if char == "\r" {
+                // Check if next character is \n for CRLF
+                let nextIndex = text.index(after: i)
+                if nextIndex < text.endIndex && text[nextIndex] == "\n" {
+                    return "\r\n"
+                }
+                return "\r"
+            } else if char == "\n" {
+                return "\n"
+            }
         }
+        return "\n" // Default to LF for single-line files
     }
     
     /// Check if the text has a trailing newline
