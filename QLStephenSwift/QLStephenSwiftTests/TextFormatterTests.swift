@@ -155,36 +155,4 @@ final class TextFormatterTests: XCTestCase {
         let bothDisabled = false && false
         XCTAssertFalse(bothDisabled, "RTF should not be generated when both are disabled")
     }
-    
-    /// Test new font customization constants
-    func testFontCustomizationConstants() throws {
-        // Test available fonts retrieval from system
-        let availableFonts = AppConstants.RTF.getAvailableMonospacedFonts()
-        XCTAssertGreaterThan(availableFonts.count, 0, "Should find at least some monospaced fonts")
-        
-        // Common monospaced fonts that should be available on macOS
-        // Note: We don't assert all exist as font availability may vary by system
-        let commonMonospacedFonts = ["Menlo", "Monaco", "Courier"]
-        let foundCommonFonts = commonMonospacedFonts.filter { availableFonts.contains($0) }
-        XCTAssertGreaterThan(foundCommonFonts.count, 0, "Should find at least one common monospaced font")
-        
-        // Test font size range
-        let minFontSize: CGFloat = 8.0
-        let maxFontSize: CGFloat = 24.0
-        XCTAssertEqual(minFontSize, 8.0)
-        XCTAssertEqual(maxFontSize, 24.0)
-    }
-    
-    /// Test dark mode color defaults
-    func testDarkModeColorDefaults() throws {
-        let defaultFgLight = "#000000"  // Black
-        let defaultBgLight = "#FFFFFF"  // White
-        let defaultFgDark = "#E0E0E0"   // Light gray
-        let defaultBgDark = "#1E1E1E"   // Dark gray
-        
-        XCTAssertEqual(defaultFgLight, "#000000")
-        XCTAssertEqual(defaultBgLight, "#FFFFFF")
-        XCTAssertEqual(defaultFgDark, "#E0E0E0")
-        XCTAssertEqual(defaultBgDark, "#1E1E1E")
-    }
 }

@@ -60,27 +60,21 @@ Render text previews as Rich Text Format (RTF) with customizable fonts, colors, 
 - **UI Control**: Toggle switch in "RTF Rendering" section
 - **Default**: Off (disabled)
 - When enabled, text is rendered as RTF with attribute styling
-- **Note**: RTF rendering requires line numbers to be enabled
 
 #### Font and Color Settings
-Font and color settings can be configured through the application UI when RTF rendering is enabled, or via the `defaults` command for advanced settings.
+Font and color settings are stored in UserDefaults and can be configured via the `defaults` command or by editing the plist directly.
 
-**UI Configurable Settings (Content Text):**
-- Font Family: Picker with monospaced fonts (Menlo, Monaco, SF Mono, Courier New, Courier)
-- Font Size: Slider (8-24 pt, default: 11.0)
-- Text Color (Light Mode): Color picker (default: black)
-- Background Color (Light Mode): Color picker (default: white)
-- Text Color (Dark Mode): Color picker (default: light gray #E0E0E0)
-- Background Color (Dark Mode): Color picker (default: dark gray #1E1E1E)
-
-**Line Number Attributes (Advanced - defaults command only):**
+**Line Number Attributes:**
 - Font Name: `lineNumberFontName` (default: "Menlo")
 - Font Size: `lineNumberFontSize` (default: 11.0)
 - Foreground Color: `lineNumberForegroundColor` (default: "#808080" - gray)
 - Background Color: `lineNumberBackgroundColor` (default: "#F5F5F5" - light gray)
 
-**Dark Mode Support:**
-Colors automatically adapt based on system appearance. The application stores separate color values for Light and Dark modes, ensuring proper text visibility and contrast in both modes.
+**Content Attributes:**
+- Font Name: `contentFontName` (default: "Menlo")
+- Font Size: `contentFontSize` (default: 11.0)
+- Foreground Color: `contentForegroundColor` (default: "#000000" - black)
+- Background Color: `contentBackgroundColor` (default: "#FFFFFF" - white)
 
 #### Tab Width Configuration
 - **Mode**: `tabWidthMode` (default: "characters")
@@ -95,17 +89,7 @@ Colors are specified as hex strings with optional alpha:
 
 ### Configuring Advanced Settings
 
-#### Using the UI (Recommended)
-
-The application UI provides controls for the most commonly used settings:
-1. Enable "RTF Rendering" toggle
-2. Use the Font Settings section to select font family and size
-3. Use the Color Settings sections to customize colors for Light and Dark modes
-4. Changes are saved automatically and take effect after restarting QuickLook
-
-#### Using defaults Command (Advanced)
-
-Use the `defaults` command to configure line number fonts and other advanced settings:
+Use the `defaults` command to configure font and color settings:
 
 ```bash
 # Set line number font
@@ -120,13 +104,9 @@ defaults write group.com.mycometg3.qlstephenswift lineNumberBackgroundColor "#EE
 defaults write group.com.mycometg3.qlstephenswift contentFontName "SF Mono"
 defaults write group.com.mycometg3.qlstephenswift contentFontSize -float 12.0
 
-# Set content colors (Light Mode)
+# Set content colors
 defaults write group.com.mycometg3.qlstephenswift contentForegroundColor "#000000"
 defaults write group.com.mycometg3.qlstephenswift contentBackgroundColor "#FFFFFF"
-
-# Set content colors (Dark Mode)
-defaults write group.com.mycometg3.qlstephenswift contentForegroundColorDark "#E0E0E0"
-defaults write group.com.mycometg3.qlstephenswift contentBackgroundColorDark "#1E1E1E"
 
 # Set tab width (in character widths)
 defaults write group.com.mycometg3.qlstephenswift tabWidthMode "characters"
@@ -163,15 +143,14 @@ The two features can be used independently or together:
    - Uses UTF-8 encoding
 
 3. **Line Numbers OFF, RTF ON**
-   - Not supported - RTF requires line numbers to be enabled
-   - The RTF toggle will be disabled when line numbers are off
+   - RTF rendering with styled fonts and colors
+   - No line numbers shown
 
 4. **Line Numbers ON, RTF ON**
    - RTF rendering with line numbers
-   - Line numbers use separate font/color attributes (configurable via defaults)
-   - Content uses customizable font/color attributes (configurable via UI)
+   - Line numbers use separate font/color attributes
+   - Content uses separate font/color attributes
    - Tab width can be customized
-   - Colors automatically adapt to Light/Dark mode
 
 ## Examples
 

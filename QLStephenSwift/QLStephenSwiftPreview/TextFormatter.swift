@@ -30,10 +30,6 @@ struct TextFormatter {
         let contentForegroundColor: String
         let contentBackgroundColor: String
         
-        // Dark mode content colors
-        let contentForegroundColorDark: String
-        let contentBackgroundColorDark: String
-        
         // Tab width settings
         let tabWidthMode: String
         let tabWidthValue: Double
@@ -62,8 +58,6 @@ struct TextFormatter {
                 contentFontSize: contentFontSize,
                 contentForegroundColor: defaults.string(forKey: AppConstants.RTF.contentForegroundColorKey) ?? AppConstants.RTF.defaultContentForegroundColor,
                 contentBackgroundColor: defaults.string(forKey: AppConstants.RTF.contentBackgroundColorKey) ?? AppConstants.RTF.defaultContentBackgroundColor,
-                contentForegroundColorDark: defaults.string(forKey: AppConstants.RTF.contentForegroundColorDarkKey) ?? AppConstants.RTF.defaultContentForegroundColorDark,
-                contentBackgroundColorDark: defaults.string(forKey: AppConstants.RTF.contentBackgroundColorDarkKey) ?? AppConstants.RTF.defaultContentBackgroundColorDark,
                 tabWidthMode: defaults.string(forKey: AppConstants.RTF.tabWidthModeKey) ?? AppConstants.RTF.defaultTabWidthMode,
                 tabWidthValue: tabWidthValue
             )
@@ -88,8 +82,8 @@ struct TextFormatter {
         }
         
         // If RTF is enabled, create attributed string
-        // Line numbers are optional - createAttributedString handles both cases
-        if settings.rtfRenderingEnabled {
+        // RTF rendering requires line numbers to be enabled
+        if settings.rtfRenderingEnabled && settings.lineNumbersEnabled {
             let attributedString = createAttributedString(
                 from: text,
                 settings: settings
@@ -187,33 +181,11 @@ struct TextFormatter {
         let lineNumberFont = NSFont(name: settings.lineNumberFontName, size: settings.lineNumberFontSize) ?? NSFont.monospacedSystemFont(ofSize: settings.lineNumberFontSize, weight: .regular)
         let contentFont = NSFont(name: settings.contentFontName, size: settings.contentFontSize) ?? NSFont.monospacedSystemFont(ofSize: settings.contentFontSize, weight: .regular)
         
-        // Create colors with Dark Mode support
+        // Create colors
         let lineNumberFgColor = colorFromHex(settings.lineNumberForegroundColor) ?? NSColor.gray
         let lineNumberBgColor = colorFromHex(settings.lineNumberBackgroundColor) ?? NSColor.lightGray.withAlphaComponent(0.3)
-        
-        // Use dynamic colors that adapt to appearance changes
-        let contentFgColorLight = colorFromHex(settings.contentForegroundColor) ?? NSColor.black
-        let contentBgColorLight = colorFromHex(settings.contentBackgroundColor) ?? NSColor.white
-        let contentFgColorDark = colorFromHex(settings.contentForegroundColorDark) ?? NSColor(white: 0.875, alpha: 1.0)
-        let contentBgColorDark = colorFromHex(settings.contentBackgroundColorDark) ?? NSColor(white: 0.118, alpha: 1.0)
-        
-        // Create dynamic colors that automatically switch based on appearance
-        // Use bestMatch to determine if appearance is dark variant
-        let contentFgColor = NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return contentFgColorDark
-            } else {
-                return contentFgColorLight
-            }
-        }
-        
-        let contentBgColor = NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return contentBgColorDark
-            } else {
-                return contentBgColorLight
-            }
-        }
+        let contentFgColor = colorFromHex(settings.contentForegroundColor) ?? NSColor.black
+        let contentBgColor = colorFromHex(settings.contentBackgroundColor) ?? NSColor.white
         
         // Create paragraph style with tab stops
         let paragraphStyle = NSMutableParagraphStyle()
@@ -296,9 +268,34 @@ struct TextFormatter {
         return result
     }
     
-    /// Convert hex string to NSColor
-    /// Delegates to shared ColorUtilities to avoid code duplication
+    /// Convert hex color string to NSColor
     private static func colorFromHex(_ hex: String) -> NSColor? {
-        return ColorUtilities.nsColorFromHex(hex)
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+        
+        var rgb: UInt64 = 0
+        
+        guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else {
+            return nil
+        }
+        
+        let length = hexSanitized.count
+        let r, g, b, a: CGFloat
+        
+        if length == 6 {
+            r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+            g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+            b = CGFloat(rgb & 0x0000FF) / 255.0
+            a = 1.0
+        } else if length == 8 {
+            r = CGFloat((rgb & 0xFF000000) >> 24) / 255.0
+            g = CGFloat((rgb & 0x00FF0000) >> 16) / 255.0
+            b = CGFloat((rgb & 0x0000FF00) >> 8) / 255.0
+            a = CGFloat(rgb & 0x000000FF) / 255.0
+        } else {
+            return nil
+        }
+        
+        return NSColor(red: r, green: g, blue: b, alpha: a)
     }
 }

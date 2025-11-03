@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import AppKit
 
 /// Shared constants used across the main app and Quick Look extension.
 /// Using App Groups to share settings between sandboxed processes.
@@ -82,10 +81,6 @@ enum AppConstants {
         static let contentForegroundColorKey = "contentForegroundColor"
         static let contentBackgroundColorKey = "contentBackgroundColor"
         
-        /// Dark mode specific color keys
-        static let contentForegroundColorDarkKey = "contentForegroundColorDark"
-        static let contentBackgroundColorDarkKey = "contentBackgroundColorDark"
-        
         /// Tab width settings keys
         static let tabWidthModeKey = "tabWidthMode"
         static let tabWidthValueKey = "tabWidthValue"
@@ -100,21 +95,6 @@ enum AppConstants {
         static let defaultContentFontSize: CGFloat = 11.0
         static let defaultContentForegroundColor = "#000000" // Black
         static let defaultContentBackgroundColor = "#FFFFFF" // White
-        
-        /// Default dark mode colors
-        static let defaultContentForegroundColorDark = "#E0E0E0" // Light gray text
-        static let defaultContentBackgroundColorDark = "#1E1E1E" // Dark background
-        
-        /// Get list of available monospaced fonts installed on the system
-        /// Returns PostScript names of monospaced font variants to ensure proper font selection
-        /// Delegates to shared FontUtilities to avoid code duplication
-        static func getAvailableMonospacedFonts() -> [String] {
-            return FontUtilities.getAvailableMonospacedFonts()
-        }
-        
-        /// Font size range
-        static let minFontSize: CGFloat = 8.0
-        static let maxFontSize: CGFloat = 24.0
         
         /// Tab width mode options
         enum TabWidthMode: String {

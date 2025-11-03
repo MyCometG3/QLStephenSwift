@@ -7,12 +7,8 @@
 //
 
 import SwiftUI
-import os
 
 struct ContentView: View {
-    // Static logger instance to avoid repeated allocations
-    private static let logger = Logger()
-    
     @State private var maxFileSize: Int = AppConstants.FileSize.defaultMaxBytes
     @State private var maxFileSizeKBText: String = ""
     
@@ -22,17 +18,6 @@ struct ContentView: View {
     
     // RTF rendering settings
     @State private var rtfRenderingEnabled: Bool = AppConstants.RTF.defaultEnabled
-    
-    // Font customization settings
-    @State private var contentFontName: String = AppConstants.RTF.defaultContentFontName
-    @State private var contentFontSize: CGFloat = AppConstants.RTF.defaultContentFontSize
-    @State private var availableFonts: [String] = []
-    
-    // Color customization settings
-    @State private var contentForegroundColor: Color = Color.black
-    @State private var contentBackgroundColor: Color = Color.white
-    @State private var contentForegroundColorDark: Color = Color(white: 0.875)
-    @State private var contentBackgroundColorDark: Color = Color(white: 0.118)
     
     var body: some View {
         ScrollView {
@@ -56,13 +41,8 @@ struct ContentView: View {
                 
                 // General Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("General Settings")
-                            .font(.headline)
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                            .help("Text files larger than this limit will be truncated in preview. (Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB)")
-                    }
+                    Text("General Settings")
+                        .font(.headline)
                     
                     HStack {
                         Text("Max Text File Size:")
@@ -79,18 +59,18 @@ struct ContentView: View {
                         
                         Spacer()
                     }
+                    
+                    Text("Text files larger than this limit will be truncated in preview. (Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 120)
                 }
                 .padding(.horizontal)
                 
                 // Line Numbers Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Line Numbers")
-                            .font(.headline)
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                            .help("Line numbers use minimum 4 digits with zero padding")
-                    }
+                    Text("Line Numbers")
+                        .font(.headline)
                     
                     HStack {
                         Text("Show Line Numbers:")
@@ -102,8 +82,12 @@ struct ContentView: View {
                                 saveLineNumbersEnabled(newValue)
                             }
                         
+                        Spacer()
+                    }
+                    
+                    HStack {
                         Text("Separator:")
-                            .frame(width: 70, alignment: .trailing)
+                            .frame(width: 140, alignment: .trailing)
                         
                         Picker("", selection: $lineSeparator) {
                             ForEach(AppConstants.LineNumbers.separatorOptions, id: \.0) { option in
@@ -117,18 +101,18 @@ struct ContentView: View {
                         
                         Spacer()
                     }
+                    
+                    Text("Line numbers use minimum 4 digits with zero padding")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 140)
                 }
                 .padding(.horizontal)
                 
                 // RTF Rendering Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("RTF Rendering")
-                            .font(.headline)
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                            .help("RTF mode applies font styles and colors. Requires line numbers to be enabled")
-                    }
+                    Text("RTF Rendering")
+                        .font(.headline)
                     
                     HStack {
                         Text("Enable RTF Output:")
@@ -136,119 +120,20 @@ struct ContentView: View {
                         
                         Toggle("", isOn: $rtfRenderingEnabled)
                             .toggleStyle(.switch)
+                            .disabled(!lineNumbersEnabled)
                             .onChange(of: rtfRenderingEnabled) { _, newValue in
                                 saveRTFEnabled(newValue)
                             }
                         
                         Spacer()
                     }
+                    
+                    Text("RTF mode applies font styles and colors. Advanced font settings can be configured via defaults")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 140)
                 }
                 .padding(.horizontal)
-                
-                // Font Customization Settings
-                if rtfRenderingEnabled {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Font Settings")
-                                .font(.headline)
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.secondary)
-                                .help("Monospaced fonts are listed by PostScript name (e.g., 'Osaka-Mono') to ensure fixed-pitch variants are used")
-                        }
-                        
-                        HStack {
-                            Text("Font Family:")
-                                .frame(width: 140, alignment: .trailing)
-                            
-                            Picker("", selection: $contentFontName) {
-                                ForEach(availableFonts, id: \.self) { font in
-                                    Text(font).tag(font)
-                                }
-                            }
-                            .frame(width: 140)
-                            .onChange(of: contentFontName) { _, newValue in
-                                saveContentFont(newValue, size: contentFontSize)
-                            }
-                            
-                            Spacer()
-                        }
-                        
-                        HStack {
-                            Text("Font Size:")
-                                .frame(width: 140, alignment: .trailing)
-                            
-                            Slider(value: $contentFontSize, in: AppConstants.RTF.minFontSize...AppConstants.RTF.maxFontSize, step: 1.0)
-                                .frame(width: 200)
-                                .onChange(of: contentFontSize) { _, newValue in
-                                    saveContentFont(contentFontName, size: newValue)
-                                }
-                            
-                            Text("\(Int(contentFontSize)) pt")
-                                .frame(width: 50, alignment: .leading)
-                            
-                            Spacer()
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    // Color Customization Settings
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Colors")
-                                .font(.headline)
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.secondary)
-                                .help("Colors automatically adapt based on system appearance")
-                        }
-                        
-                        HStack {
-                            Text("Light Mode:")
-                                .frame(width: 140, alignment: .trailing)
-                            
-                            Text("Text")
-                                .frame(width: 50, alignment: .trailing)
-                            ColorPicker("", selection: $contentForegroundColor, supportsOpacity: false)
-                                .labelsHidden()
-                                .onChange(of: contentForegroundColor) { _, newValue in
-                                    saveContentColors()
-                                }
-                            
-                            Text("Background")
-                                .frame(width: 80, alignment: .trailing)
-                            ColorPicker("", selection: $contentBackgroundColor, supportsOpacity: false)
-                                .labelsHidden()
-                                .onChange(of: contentBackgroundColor) { _, newValue in
-                                    saveContentColors()
-                                }
-                            
-                            Spacer()
-                        }
-                        
-                        HStack {
-                            Text("Dark Mode:")
-                                .frame(width: 140, alignment: .trailing)
-                            
-                            Text("Text")
-                                .frame(width: 50, alignment: .trailing)
-                            ColorPicker("", selection: $contentForegroundColorDark, supportsOpacity: false)
-                                .labelsHidden()
-                                .onChange(of: contentForegroundColorDark) { _, newValue in
-                                    saveContentColors()
-                                }
-                            
-                            Text("Background")
-                                .frame(width: 80, alignment: .trailing)
-                            ColorPicker("", selection: $contentBackgroundColorDark, supportsOpacity: false)
-                                .labelsHidden()
-                                .onChange(of: contentBackgroundColorDark) { _, newValue in
-                                    saveContentColors()
-                                }
-                            
-                            Spacer()
-                        }
-                    }
-                    .padding(.horizontal)
-                }
                 
                 Divider()
                 
@@ -291,9 +176,6 @@ struct ContentView: View {
             return
         }
         
-        // Load available monospaced fonts from system
-        availableFonts = AppConstants.RTF.getAvailableMonospacedFonts()
-        
         // Migrate old keys FIRST if present and not already migrated
         // This ensures correct priority: legacy settings are only used if no App Group setting exists
         migrateOldSettingsIfNeeded(to: sharedDefaults)
@@ -313,40 +195,6 @@ struct ContentView: View {
         
         // Load RTF rendering settings
         rtfRenderingEnabled = sharedDefaults.bool(forKey: AppConstants.RTF.enabledKey)
-        
-        // Load font settings with proper fallback chain
-        let storedFontName = sharedDefaults.string(forKey: AppConstants.RTF.contentFontNameKey) ?? AppConstants.RTF.defaultContentFontName
-        // Validate that stored font is available, fallback to default, then first available, then system font
-        if availableFonts.contains(storedFontName) {
-            contentFontName = storedFontName
-        } else if availableFonts.contains(AppConstants.RTF.defaultContentFontName) {
-            contentFontName = AppConstants.RTF.defaultContentFontName
-        } else if let firstAvailable = availableFonts.first {
-            contentFontName = firstAvailable
-            Self.logger.warning("Default font '\(AppConstants.RTF.defaultContentFontName)' not available, using '\(firstAvailable)'")
-        } else {
-            // Extreme edge case: no monospaced fonts detected
-            // Use system monospaced font as guaranteed fallback
-            let systemFont = NSFont.monospacedSystemFont(ofSize: AppConstants.RTF.defaultContentFontSize, weight: .regular)
-            contentFontName = systemFont.fontName
-            Self.logger.warning("No monospaced fonts detected, using system monospaced font: '\(systemFont.fontName)'")
-        }
-        let fontSizeValue = sharedDefaults.double(forKey: AppConstants.RTF.contentFontSizeKey)
-        contentFontSize = fontSizeValue != 0 ? CGFloat(fontSizeValue) : AppConstants.RTF.defaultContentFontSize
-        
-        // Load color settings
-        if let fgHex = sharedDefaults.string(forKey: AppConstants.RTF.contentForegroundColorKey) {
-            contentForegroundColor = colorFromHex(fgHex) ?? Color.black
-        }
-        if let bgHex = sharedDefaults.string(forKey: AppConstants.RTF.contentBackgroundColorKey) {
-            contentBackgroundColor = colorFromHex(bgHex) ?? Color.white
-        }
-        if let fgDarkHex = sharedDefaults.string(forKey: AppConstants.RTF.contentForegroundColorDarkKey) {
-            contentForegroundColorDark = colorFromHex(fgDarkHex) ?? Color(white: 0.875)
-        }
-        if let bgDarkHex = sharedDefaults.string(forKey: AppConstants.RTF.contentBackgroundColorDarkKey) {
-            contentBackgroundColorDark = colorFromHex(bgDarkHex) ?? Color(white: 0.118)
-        }
     }
     
     /// Migrates settings from legacy storage locations to App Group shared storage
@@ -428,38 +276,6 @@ struct ContentView: View {
             return
         }
         sharedDefaults.set(enabled, forKey: AppConstants.RTF.enabledKey)
-    }
-    
-    /// Saves content font settings to shared storage
-    private func saveContentFont(_ name: String, size: CGFloat) {
-        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
-            return
-        }
-        sharedDefaults.set(name, forKey: AppConstants.RTF.contentFontNameKey)
-        sharedDefaults.set(Double(size), forKey: AppConstants.RTF.contentFontSizeKey)
-    }
-    
-    /// Saves content color settings to shared storage
-    private func saveContentColors() {
-        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
-            return
-        }
-        sharedDefaults.set(colorToHex(contentForegroundColor), forKey: AppConstants.RTF.contentForegroundColorKey)
-        sharedDefaults.set(colorToHex(contentBackgroundColor), forKey: AppConstants.RTF.contentBackgroundColorKey)
-        sharedDefaults.set(colorToHex(contentForegroundColorDark), forKey: AppConstants.RTF.contentForegroundColorDarkKey)
-        sharedDefaults.set(colorToHex(contentBackgroundColorDark), forKey: AppConstants.RTF.contentBackgroundColorDarkKey)
-    }
-    
-    /// Convert SwiftUI Color to hex string
-    /// Delegates to shared ColorUtilities to avoid code duplication
-    private func colorToHex(_ color: Color) -> String {
-        return ColorUtilities.colorToHex(color)
-    }
-    
-    /// Convert hex string to SwiftUI Color
-    /// Delegates to shared ColorUtilities to avoid code duplication
-    private func colorFromHex(_ hex: String) -> Color? {
-        return ColorUtilities.colorFromHex(hex)
     }
 }
 
