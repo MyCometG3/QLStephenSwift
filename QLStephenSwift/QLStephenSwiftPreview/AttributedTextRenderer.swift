@@ -152,8 +152,11 @@ struct AttributedTextRenderer {
         let tabWidth: CGFloat
         switch settings.tabWidth.mode {
         case .characters:
-            // Calculate width of one character in the font
-            let characterWidth = font.advancement(forGlyph: font.glyph(withName: "m")).width
+            // Calculate width of one character in the font using a more modern approach
+            // Use 'm' character as reference for monospace width
+            let mString = "m" as NSString
+            let size = mString.size(withAttributes: [.font: font])
+            let characterWidth = size.width
             tabWidth = characterWidth * settings.tabWidth.value
         case .points:
             tabWidth = settings.tabWidth.value

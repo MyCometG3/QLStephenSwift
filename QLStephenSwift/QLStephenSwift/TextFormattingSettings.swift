@@ -1,6 +1,6 @@
 //
 //  TextFormattingSettings.swift
-//  QLStephenSwiftPreview
+//  QLStephenSwift
 //
 //  Created by GitHub Copilot on 2025/11/03.
 //  Copyright © 2025 MyCometG3. All rights reserved.
@@ -121,29 +121,34 @@ struct TextFormattingSettings {
             return .default
         }
         
+        // Helper to safely get double value with default
+        func getDouble(key: String, default defaultValue: Double) -> Double {
+            guard sharedDefaults.object(forKey: key) != nil else {
+                return defaultValue
+            }
+            return sharedDefaults.double(forKey: key)
+        }
+        
         return TextFormattingSettings(
             lineNumbersEnabled: sharedDefaults.bool(forKey: Keys.lineNumbersEnabled),
             lineSeparator: sharedDefaults.string(forKey: Keys.lineSeparator) ?? " ",
             rtfRenderingEnabled: sharedDefaults.bool(forKey: Keys.rtfRenderingEnabled),
             lineNumberFont: FontAttributes(
                 fontName: sharedDefaults.string(forKey: Keys.lineNumberFontName) ?? "Menlo",
-                fontSize: CGFloat(sharedDefaults.double(forKey: Keys.lineNumberFontSize) != 0 ? 
-                                sharedDefaults.double(forKey: Keys.lineNumberFontSize) : 11.0),
+                fontSize: CGFloat(getDouble(key: Keys.lineNumberFontSize, default: 11.0)),
                 textColor: loadColor(from: sharedDefaults, key: Keys.lineNumberTextColor) ?? .secondaryLabelColor,
                 backgroundColor: loadColor(from: sharedDefaults, key: Keys.lineNumberBackgroundColor) ?? 
                                NSColor(white: 0.95, alpha: 1.0)
             ),
             contentFont: FontAttributes(
                 fontName: sharedDefaults.string(forKey: Keys.contentFontName) ?? "Menlo",
-                fontSize: CGFloat(sharedDefaults.double(forKey: Keys.contentFontSize) != 0 ?
-                                sharedDefaults.double(forKey: Keys.contentFontSize) : 11.0),
+                fontSize: CGFloat(getDouble(key: Keys.contentFontSize, default: 11.0)),
                 textColor: loadColor(from: sharedDefaults, key: Keys.contentTextColor) ?? .textColor,
                 backgroundColor: loadColor(from: sharedDefaults, key: Keys.contentBackgroundColor)
             ),
             tabWidth: TabWidthSettings(
                 mode: TabWidthSettings.Mode(rawValue: sharedDefaults.string(forKey: Keys.tabWidthMode) ?? "characters") ?? .characters,
-                value: CGFloat(sharedDefaults.double(forKey: Keys.tabWidthValue) != 0 ?
-                             sharedDefaults.double(forKey: Keys.tabWidthValue) : 4.0)
+                value: CGFloat(getDouble(key: Keys.tabWidthValue, default: 4.0))
             )
         )
     }
