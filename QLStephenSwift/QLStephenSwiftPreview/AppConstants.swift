@@ -34,4 +34,75 @@ enum AppConstants {
         /// Maximum allowed file size in KB for user configuration (10MB)
         static let maxKB = 10240
     }
+    
+    /// Line number display settings
+    enum LineNumbers {
+        /// UserDefaults key for line numbers enabled setting
+        static let enabledKey = "lineNumbersEnabled"
+        
+        /// UserDefaults key for line separator setting
+        static let separatorKey = "lineSeparator"
+        
+        /// Default value for line numbers enabled
+        static let defaultEnabled = false
+        
+        /// Default line separator
+        static let defaultSeparator = " "
+        
+        /// Minimum digit width for line numbers
+        static let minDigits = 4
+        
+        /// Available separator options
+        static let separatorOptions = [
+            ("space", " "),
+            ("colon", ":"),
+            ("pipe", "|"),
+            ("tab", "\t")
+        ]
+    }
+    
+    /// RTF rendering settings
+    enum RTF {
+        /// UserDefaults key for RTF rendering enabled setting
+        static let enabledKey = "rtfRenderingEnabled"
+        
+        /// Default value for RTF rendering enabled
+        static let defaultEnabled = false
+        
+        /// Line number font settings keys
+        static let lineNumberFontNameKey = "lineNumberFontName"
+        static let lineNumberFontSizeKey = "lineNumberFontSize"
+        static let lineNumberForegroundColorKey = "lineNumberForegroundColor"
+        static let lineNumberBackgroundColorKey = "lineNumberBackgroundColor"
+        
+        /// Content font settings keys
+        static let contentFontNameKey = "contentFontName"
+        static let contentFontSizeKey = "contentFontSize"
+        static let contentForegroundColorKey = "contentForegroundColor"
+        static let contentBackgroundColorKey = "contentBackgroundColor"
+        
+        /// Tab width settings keys
+        static let tabWidthModeKey = "tabWidthMode"
+        static let tabWidthValueKey = "tabWidthValue"
+        
+        /// Default font settings
+        static let defaultLineNumberFontName = "Menlo"
+        static let defaultLineNumberFontSize: CGFloat = 11.0
+        static let defaultLineNumberForegroundColor = "#808080" // Gray
+        static let defaultLineNumberBackgroundColor = "#F5F5F5" // Light gray
+        
+        static let defaultContentFontName = "Menlo"
+        static let defaultContentFontSize: CGFloat = 11.0
+        static let defaultContentForegroundColor = "#000000" // Black
+        static let defaultContentBackgroundColor = "#FFFFFF" // White
+        
+        /// Tab width mode options
+        enum TabWidthMode: String {
+            case characters = "characters"
+            case points = "points"
+        }
+        
+        static let defaultTabWidthMode = TabWidthMode.characters.rawValue
+        static let defaultTabWidthValue: Double = 4.0
+    }
 }

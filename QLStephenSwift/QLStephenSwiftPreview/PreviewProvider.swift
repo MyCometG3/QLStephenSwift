@@ -30,6 +30,9 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         // Get max file size from user defaults
         let maxFileSize = getMaxFileSize()
         
+        // Get formatting settings
+        let settings = getFormattingSettings()
+        
         // Get file size
         let fileManager = FileManager.default
         guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
@@ -37,7 +40,13 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             throw PreviewError.cannotReadFile
         }
         
-        let contentType = UTType.plainText
+        // Determine content type based on formatting settings
+        let contentType: UTType
+        if settings.rtfRenderingEnabled {
+            contentType = UTType.rtf
+        } else {
+            contentType = UTType.plainText
+        }
         
         let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
             var data: Data
@@ -58,8 +67,32 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
                 data = fileData
             }
             
-            reply.stringEncoding = analysisResult.encoding
-            return data
+            // If line numbers or RTF rendering are enabled, format the text
+            if settings.lineNumbersEnabled || settings.rtfRenderingEnabled {
+                // Decode the text using detected encoding
+                guard let text = String(data: data, encoding: analysisResult.encoding) else {
+                    // Fallback: return original data if decoding fails
+                    reply.stringEncoding = analysisResult.encoding
+                    return data
+                }
+                
+                // Format the text with line numbers and/or RTF
+                if let formattedData = TextFormatter.format(text: text, with: settings) {
+                    // For RTF, don't set stringEncoding
+                    if !settings.rtfRenderingEnabled {
+                        reply.stringEncoding = .utf8
+                    }
+                    return formattedData
+                } else {
+                    // Fallback: return original data if formatting fails
+                    reply.stringEncoding = analysisResult.encoding
+                    return data
+                }
+            } else {
+                // Original behavior: return raw data with encoding
+                reply.stringEncoding = analysisResult.encoding
+                return data
+            }
         }
         
         return reply
@@ -95,6 +128,31 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         }
         
         return AppConstants.FileSize.defaultMaxBytes
+    }
+    
+    /// Retrieves formatting settings from shared storage
+    /// - Returns: TextFormatter settings
+    private func getFormattingSettings() -> TextFormatter.Settings {
+        if let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) {
+            return TextFormatter.Settings.load(from: sharedDefaults)
+        }
+        
+        // Fallback to default settings if shared defaults unavailable
+        return TextFormatter.Settings(
+            lineNumbersEnabled: AppConstants.LineNumbers.defaultEnabled,
+            lineSeparator: AppConstants.LineNumbers.defaultSeparator,
+            rtfRenderingEnabled: AppConstants.RTF.defaultEnabled,
+            lineNumberFontName: AppConstants.RTF.defaultLineNumberFontName,
+            lineNumberFontSize: AppConstants.RTF.defaultLineNumberFontSize,
+            lineNumberForegroundColor: AppConstants.RTF.defaultLineNumberForegroundColor,
+            lineNumberBackgroundColor: AppConstants.RTF.defaultLineNumberBackgroundColor,
+            contentFontName: AppConstants.RTF.defaultContentFontName,
+            contentFontSize: AppConstants.RTF.defaultContentFontSize,
+            contentForegroundColor: AppConstants.RTF.defaultContentForegroundColor,
+            contentBackgroundColor: AppConstants.RTF.defaultContentBackgroundColor,
+            tabWidthMode: AppConstants.RTF.defaultTabWidthMode,
+            tabWidthValue: AppConstants.RTF.defaultTabWidthValue
+        )
     }
 }
 
