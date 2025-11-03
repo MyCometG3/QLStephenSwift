@@ -77,8 +77,9 @@ struct RTFGenerator {
         paragraphStyle.defaultTabInterval = tabWidth
         
         // Set tab stops at regular intervals
+        let maxTabStops = 50 // Maximum number of tab stops to create
         var tabStops: [NSTextTab] = []
-        for i in 1...50 { // Create 50 tab stops
+        for i in 1...maxTabStops {
             let location = tabWidth * CGFloat(i)
             tabStops.append(NSTextTab(textAlignment: .left, location: location, options: [:]))
         }

@@ -224,13 +224,11 @@ struct ContentView: View {
     
     /// Saves rendering settings to shared UserDefaults
     private func saveRenderingSettings() {
-        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
-            return
-        }
-        
-        sharedDefaults.set(lineNumbersEnabled, forKey: "lineNumbersEnabled")
-        sharedDefaults.set(lineSeparator, forKey: "lineSeparator")
-        sharedDefaults.set(rtfRenderingEnabled, forKey: "rtfRenderingEnabled")
+        var settings = TextRenderingSettings().toMutable()
+        settings.lineNumbersEnabled = lineNumbersEnabled
+        settings.lineSeparator = lineSeparator
+        settings.rtfRenderingEnabled = rtfRenderingEnabled
+        settings.save()
     }
     
     /// Migrates settings from legacy storage locations to App Group shared storage

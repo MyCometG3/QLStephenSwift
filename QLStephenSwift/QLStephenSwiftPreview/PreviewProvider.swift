@@ -41,7 +41,8 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         let settings = TextRenderingSettings()
         
         // Determine if we need RTF rendering
-        let needsRTFRendering = settings.rtfRenderingEnabled && (settings.lineNumbersEnabled || hasCustomFormatting(settings))
+        // RTF is used when explicitly enabled, as it provides custom formatting capabilities
+        let needsRTFRendering = settings.rtfRenderingEnabled
         
         let contentType = needsRTFRendering ? UTType.rtf : UTType.plainText
         
@@ -98,12 +99,7 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         return reply
     }
     
-    /// Checks if custom formatting is enabled
-    private func hasCustomFormatting(_ settings: TextRenderingSettings) -> Bool {
-        // Check if any non-default formatting is applied
-        // For simplicity, we always consider RTF enabled as having custom formatting
-        return true
-    }
+
     
     /// Retrieves the maximum file size setting from shared storage
     /// 

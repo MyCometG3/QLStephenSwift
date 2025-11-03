@@ -202,35 +202,33 @@ struct MutableTextRenderingSettings {
     var tabWidthMode: TextRenderingSettings.TabWidthMode
     var tabWidthValue: CGFloat
     
-    /// Converts to immutable settings
-    func toImmutable() -> TextRenderingSettings {
-        // Note: This creates a settings instance but doesn't load from UserDefaults
-        // We need to save first, then reload
-        let settings = TextRenderingSettings()
-        // Create a temporary instance with our values
+    /// Saves settings to UserDefaults
+    func save() {
         guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
-            return settings
+            return
         }
         
-        // Save all values
-        sharedDefaults.set(lineNumbersEnabled, forKey: "lineNumbersEnabled")
-        sharedDefaults.set(lineSeparator, forKey: "lineSeparator")
-        sharedDefaults.set(rtfRenderingEnabled, forKey: "rtfRenderingEnabled")
+        sharedDefaults.set(lineNumbersEnabled, forKey: TextRenderingSettings.Keys.lineNumbersEnabled)
+        sharedDefaults.set(lineSeparator, forKey: TextRenderingSettings.Keys.lineSeparator)
+        sharedDefaults.set(rtfRenderingEnabled, forKey: TextRenderingSettings.Keys.rtfRenderingEnabled)
         
-        sharedDefaults.set(lineNumberFontName, forKey: "lineNumberFontName")
-        sharedDefaults.set(Double(lineNumberFontSize), forKey: "lineNumberFontSize")
-        sharedDefaults.set(lineNumberTextColor, forKey: "lineNumberTextColor")
-        sharedDefaults.set(lineNumberBackgroundColor, forKey: "lineNumberBackgroundColor")
+        sharedDefaults.set(lineNumberFontName, forKey: TextRenderingSettings.Keys.lineNumberFontName)
+        sharedDefaults.set(Double(lineNumberFontSize), forKey: TextRenderingSettings.Keys.lineNumberFontSize)
+        sharedDefaults.set(lineNumberTextColor, forKey: TextRenderingSettings.Keys.lineNumberTextColor)
+        sharedDefaults.set(lineNumberBackgroundColor, forKey: TextRenderingSettings.Keys.lineNumberBackgroundColor)
         
-        sharedDefaults.set(contentFontName, forKey: "contentFontName")
-        sharedDefaults.set(Double(contentFontSize), forKey: "contentFontSize")
-        sharedDefaults.set(contentTextColor, forKey: "contentTextColor")
-        sharedDefaults.set(contentBackgroundColor, forKey: "contentBackgroundColor")
+        sharedDefaults.set(contentFontName, forKey: TextRenderingSettings.Keys.contentFontName)
+        sharedDefaults.set(Double(contentFontSize), forKey: TextRenderingSettings.Keys.contentFontSize)
+        sharedDefaults.set(contentTextColor, forKey: TextRenderingSettings.Keys.contentTextColor)
+        sharedDefaults.set(contentBackgroundColor, forKey: TextRenderingSettings.Keys.contentBackgroundColor)
         
-        sharedDefaults.set(tabWidthMode.rawValue, forKey: "tabWidthMode")
-        sharedDefaults.set(Double(tabWidthValue), forKey: "tabWidthValue")
-        
-        // Reload and return
+        sharedDefaults.set(tabWidthMode.rawValue, forKey: TextRenderingSettings.Keys.tabWidthMode)
+        sharedDefaults.set(Double(tabWidthValue), forKey: TextRenderingSettings.Keys.tabWidthValue)
+    }
+    
+    /// Converts to immutable settings by saving and reloading
+    func toImmutable() -> TextRenderingSettings {
+        save()
         return TextRenderingSettings()
     }
 }
