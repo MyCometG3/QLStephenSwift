@@ -68,6 +68,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		1690E2C92EB8E8CC00264B92 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		16D32B002EB1886D007D8E56 /* QLStephenSwift */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = QLStephenSwift;
@@ -129,6 +134,7 @@
 		16D32AF52EB1886D007D8E56 = {
 			isa = PBXGroup;
 			children = (
+				1690E2C92EB8E8CC00264B92 /* Shared */,
 				16D32B002EB1886D007D8E56 /* QLStephenSwift */,
 				16D32B0E2EB1886E007D8E56 /* QLStephenSwiftTests */,
 				16D32B182EB1886E007D8E56 /* QLStephenSwiftUITests */,
@@ -175,6 +181,7 @@
 				16D32B3A2EB188AF007D8E56 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				1690E2C92EB8E8CC00264B92 /* Shared */,
 				16D32B002EB1886D007D8E56 /* QLStephenSwift */,
 			);
 			name = QLStephenSwift;
@@ -243,6 +250,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				1690E2C92EB8E8CC00264B92 /* Shared */,
 				16D32B302EB188AF007D8E56 /* QLStephenSwiftPreview */,
 			);
 			name = QLStephenSwiftPreview;
