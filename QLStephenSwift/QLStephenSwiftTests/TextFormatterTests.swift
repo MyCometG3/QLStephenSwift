@@ -142,8 +142,7 @@ final class TextFormatterTests: XCTestCase {
         // Case 1: rtfEnabled=true, lineNumbers=false -> SHOULD generate RTF (without line numbers)
         let rtfOnlyEnabled = true
         let lineNumbersDisabled = false
-        let shouldGenerateRTF = rtfOnlyEnabled
-        XCTAssertTrue(shouldGenerateRTF, "RTF should be generated even when line numbers are disabled")
+        XCTAssertTrue(rtfOnlyEnabled, "RTF should be generated even when line numbers are disabled")
         
         // Case 2: rtfEnabled=true, lineNumbers=true -> SHOULD generate RTF (with line numbers)
         let rtfEnabledLineNumbersEnabled = true && true
