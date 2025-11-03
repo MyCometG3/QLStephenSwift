@@ -136,7 +136,6 @@ struct ContentView: View {
                         
                         Toggle("", isOn: $rtfRenderingEnabled)
                             .toggleStyle(.switch)
-                            .disabled(!lineNumbersEnabled)
                             .onChange(of: rtfRenderingEnabled) { _, newValue in
                                 saveRTFEnabled(newValue)
                             }
