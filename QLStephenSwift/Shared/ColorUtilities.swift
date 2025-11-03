@@ -40,7 +40,7 @@ enum ColorUtilities {
             b = CGFloat(rgb & 0x0000FF) / 255.0
         } else { // length == 8
             // Format: #RRGGBBAA - red at bits 24-31, green at 16-23, blue at 8-15, alpha at 0-7
-            // Alpha is ignored in our use case
+            // Alpha channel is not extracted as we always use full opacity (alpha = 1.0) for RTF rendering
             r = CGFloat((rgb & 0xFF000000) >> 24) / 255.0
             g = CGFloat((rgb & 0x00FF0000) >> 16) / 255.0
             b = CGFloat((rgb & 0x0000FF00) >> 8) / 255.0
