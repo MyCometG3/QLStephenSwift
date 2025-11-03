@@ -97,12 +97,8 @@ struct ContentView: View {
                                 saveLineNumbersEnabled(newValue)
                             }
                         
-                        Spacer()
-                    }
-                    
-                    HStack {
                         Text("Separator:")
-                            .frame(width: 140, alignment: .trailing)
+                            .frame(width: 70, alignment: .trailing)
                         
                         Picker("", selection: $lineSeparator) {
                             ForEach(AppConstants.LineNumbers.separatorOptions, id: \.0) { option in
