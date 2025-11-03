@@ -107,6 +107,19 @@ struct TextFormatter {
     
     /// Add line numbers to text
     private static func addLineNumbers(to text: String, separator: String) -> String {
+        // Detect the line ending style used in the original text
+        // Check for CRLF first, then LF, then CR (order matters)
+        let lineEnding: String
+        if text.contains("\r\n") {
+            lineEnding = "\r\n"
+        } else if text.contains("\n") {
+            lineEnding = "\n"
+        } else if text.contains("\r") {
+            lineEnding = "\r"
+        } else {
+            lineEnding = "\n" // Default to LF for single-line files
+        }
+        
         // Split on line breaks while preserving line structure
         // This handles LF, CR, and CRLF correctly without creating empty elements
         // Match CRLF first, then LF, then CR to avoid splitting CRLF into CR + LF
@@ -124,15 +137,12 @@ struct TextFormatter {
             numberedLines.append("\(paddedNumber)\(separator)\(line)")
         }
         
-        var result = numberedLines.joined(separator: "\n")
+        // Join with the detected line ending to preserve the original style
+        var result = numberedLines.joined(separator: lineEnding)
         
-        // Add trailing newline if original text had one (\n, \r, or \r\n)
-        if text.hasSuffix("\r\n") {
-            result.append("\r\n")
-        } else if text.hasSuffix("\n") {
-            result.append("\n")
-        } else if text.hasSuffix("\r") {
-            result.append("\r")
+        // Add trailing newline if original text had one
+        if text.hasSuffix("\r\n") || text.hasSuffix("\n") || text.hasSuffix("\r") {
+            result.append(lineEnding)
         }
         
         return result
@@ -140,6 +150,19 @@ struct TextFormatter {
     
     /// Create attributed string with formatting
     private static func createAttributedString(from text: String, settings: Settings) -> NSAttributedString {
+        // Detect the line ending style used in the original text
+        // Check for CRLF first, then LF, then CR (order matters)
+        let lineEnding: String
+        if text.contains("\r\n") {
+            lineEnding = "\r\n"
+        } else if text.contains("\n") {
+            lineEnding = "\n"
+        } else if text.contains("\r") {
+            lineEnding = "\r"
+        } else {
+            lineEnding = "\n" // Default to LF for single-line files
+        }
+        
         // Split on line breaks while preserving line structure
         // This handles LF, CR, and CRLF correctly without creating empty elements
         // Match CRLF first, then LF, then CR to avoid splitting CRLF into CR + LF
@@ -222,8 +245,9 @@ struct TextFormatter {
             result.append(contentString)
             
             // Add newline except for last line (if original didn't have trailing newline)
+            // Use the detected line ending to preserve the original style
             if index < lines.count - 1 || text.hasSuffix("\r\n") || text.hasSuffix("\n") || text.hasSuffix("\r") {
-                let newlineString = NSAttributedString(string: "\n", attributes: contentAttributes)
+                let newlineString = NSAttributedString(string: lineEnding, attributes: contentAttributes)
                 result.append(newlineString)
             }
             
