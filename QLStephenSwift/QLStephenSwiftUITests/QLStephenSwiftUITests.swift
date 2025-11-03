@@ -39,4 +39,46 @@ final class QLStephenSwiftUITests: XCTestCase {
             XCUIApplication().launch()
         }
     }
+    
+    @MainActor
+    func testRTFToggleDependsOnLineNumbers() throws {
+        // Test that the RTF Output toggle is disabled when Line Numbers are disabled
+        let app = XCUIApplication()
+        app.launch()
+        
+        // Find the toggles
+        let lineNumbersToggle = app.switches["Show Line Numbers:"]
+        let rtfToggle = app.switches["Enable RTF Output:"]
+        
+        // Ensure line numbers toggle exists
+        XCTAssertTrue(lineNumbersToggle.exists, "Line Numbers toggle should exist")
+        
+        // Ensure RTF toggle exists
+        XCTAssertTrue(rtfToggle.exists, "RTF toggle should exist")
+        
+        // If line numbers are enabled, turn them off
+        if lineNumbersToggle.value as? String == "1" {
+            lineNumbersToggle.tap()
+        }
+        
+        // Verify that when line numbers are off, RTF toggle is disabled
+        XCTAssertFalse(rtfToggle.isEnabled, "RTF toggle should be disabled when line numbers are off")
+        
+        // Enable line numbers
+        lineNumbersToggle.tap()
+        
+        // Verify that when line numbers are on, RTF toggle is enabled
+        XCTAssertTrue(rtfToggle.isEnabled, "RTF toggle should be enabled when line numbers are on")
+        
+        // Enable RTF
+        if rtfToggle.value as? String == "0" {
+            rtfToggle.tap()
+        }
+        
+        // Disable line numbers again
+        lineNumbersToggle.tap()
+        
+        // Verify RTF is automatically disabled
+        XCTAssertEqual(rtfToggle.value as? String, "0", "RTF should be automatically disabled when line numbers are turned off")
+    }
 }
