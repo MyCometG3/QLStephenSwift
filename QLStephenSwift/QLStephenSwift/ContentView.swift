@@ -10,6 +10,9 @@ import SwiftUI
 import os
 
 struct ContentView: View {
+    // Static logger instance to avoid repeated allocations
+    private static let logger = Logger()
+    
     @State private var maxFileSize: Int = AppConstants.FileSize.defaultMaxBytes
     @State private var maxFileSizeKBText: String = ""
     
@@ -321,13 +324,13 @@ struct ContentView: View {
             contentFontName = AppConstants.RTF.defaultContentFontName
         } else if let firstAvailable = availableFonts.first {
             contentFontName = firstAvailable
-            Logger().warning("Default font '\(AppConstants.RTF.defaultContentFontName)' not available, using '\(firstAvailable)'")
+            Self.logger.warning("Default font '\(AppConstants.RTF.defaultContentFontName)' not available, using '\(firstAvailable)'")
         } else {
             // Extreme edge case: no monospaced fonts detected
             // Use system monospaced font as guaranteed fallback
             let systemFont = NSFont.monospacedSystemFont(ofSize: AppConstants.RTF.defaultContentFontSize, weight: .regular)
             contentFontName = systemFont.fontName
-            Logger().warning("No monospaced fonts detected, using system monospaced font: '\(systemFont.fontName)'")
+            Self.logger.warning("No monospaced fonts detected, using system monospaced font: '\(systemFont.fontName)'")
         }
         let fontSizeValue = sharedDefaults.double(forKey: AppConstants.RTF.contentFontSizeKey)
         contentFontSize = fontSizeValue != 0 ? CGFloat(fontSizeValue) : AppConstants.RTF.defaultContentFontSize
