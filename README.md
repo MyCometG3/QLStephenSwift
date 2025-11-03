@@ -185,10 +185,9 @@ pluginkit -m -v -i com.apple.quicklook.preview
 pluginkit -m -v -i com.apple.quicklook.preview | grep -i qlstephen
 ```
 
-**Reset pluginkit database (if extensions are not appearing):**
+**Force re-register the extension (if not appearing):**
 ```bash
-pluginkit -m -v -i com.apple.quicklook.preview
-pluginkit -r /Applications/QLStephenSwift.app
+pluginkit -a /Applications/QLStephenSwift.app/Contents/PlugIns/QLStephenSwiftPreview.appex
 ```
 
 **Note:** The `qlmanage` command is useful for testing previews and clearing caches, but `pluginkit` is the proper tool for managing App Extension-based Quick Look plugins. Legacy `.qlgenerator` plugins are deprecated in modern macOS versions.
