@@ -109,7 +109,8 @@ struct TextFormatter {
     private static func addLineNumbers(to text: String, separator: String) -> String {
         // Split on line breaks while preserving line structure
         // This handles LF, CR, and CRLF correctly without creating empty elements
-        let lines = text.split(separator: /\r\n|\r|\n/, omittingEmptySubsequences: false).map(String.init)
+        // Match CRLF first, then LF, then CR to avoid splitting CRLF into CR + LF
+        let lines = text.split(separator: /\r\n|\n|\r/, omittingEmptySubsequences: false).map(String.init)
         let lineCount = lines.count
         let digitWidth = max(AppConstants.LineNumbers.minDigits, String(lineCount).count)
         
@@ -137,7 +138,8 @@ struct TextFormatter {
     private static func createAttributedString(from text: String, settings: Settings) -> NSAttributedString {
         // Split on line breaks while preserving line structure
         // This handles LF, CR, and CRLF correctly without creating empty elements
-        let lines = text.split(separator: /\r\n|\r|\n/, omittingEmptySubsequences: false).map(String.init)
+        // Match CRLF first, then LF, then CR to avoid splitting CRLF into CR + LF
+        let lines = text.split(separator: /\r\n|\n|\r/, omittingEmptySubsequences: false).map(String.init)
         let lineCount = lines.count
         let digitWidth = settings.lineNumbersEnabled ? max(AppConstants.LineNumbers.minDigits, String(lineCount).count) : 0
         
