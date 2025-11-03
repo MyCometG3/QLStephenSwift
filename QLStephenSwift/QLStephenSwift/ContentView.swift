@@ -130,6 +130,7 @@ struct ContentView: View {
                         
                         Toggle("", isOn: $rtfRenderingEnabled)
                             .toggleStyle(.switch)
+                            .disabled(!lineNumbersEnabled)
                             .onChange(of: rtfRenderingEnabled) { _, newValue in
                                 saveRTFEnabled(newValue)
                             }
@@ -137,7 +138,7 @@ struct ContentView: View {
                         Spacer()
                     }
                     
-                    Text("RTF mode applies font styles and colors to text preview")
+                    Text("RTF mode applies font styles and colors. Requires line numbers to be enabled")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.leading, 140)

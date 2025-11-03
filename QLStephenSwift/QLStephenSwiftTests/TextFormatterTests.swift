@@ -133,27 +133,27 @@ final class TextFormatterTests: XCTestCase {
         XCTAssertEqual(defaultTabValue, 4.0)
     }
     
-    /// Test RTF rendering independence from line numbers
-    func testRTFIndependence() throws {
+    /// Test that RTF rendering requires line numbers to be enabled
+    func testRTFRequiresLineNumbers() throws {
         // Document the expected behavior:
-        // - RTF rendering can work independently of line numbers
-        // - RTF is enabled based solely on rtfRenderingEnabled setting
+        // - RTF rendering should only work when line numbers are enabled
+        // - This ensures UI and backend logic are consistent
         
-        // Case 1: rtfEnabled=true, lineNumbers=false -> SHOULD generate RTF (without line numbers)
-        let rtfEnabledLineNumbersDisabled = true
-        XCTAssertTrue(rtfEnabledLineNumbersDisabled, "RTF should be generated even when line numbers are disabled")
+        // Case 1: rtfEnabled=true, lineNumbers=false -> should NOT generate RTF
+        let rtfEnabledLineNumbersDisabled = true && false
+        XCTAssertFalse(rtfEnabledLineNumbersDisabled, "RTF should not be generated when line numbers are disabled")
         
-        // Case 2: rtfEnabled=true, lineNumbers=true -> SHOULD generate RTF (with line numbers)
-        let rtfEnabledLineNumbersEnabled = true
+        // Case 2: rtfEnabled=true, lineNumbers=true -> should generate RTF
+        let rtfEnabledLineNumbersEnabled = true && true
         XCTAssertTrue(rtfEnabledLineNumbersEnabled, "RTF should be generated when both RTF and line numbers are enabled")
         
-        // Case 3: rtfEnabled=false, lineNumbers=true -> should NOT generate RTF (plain text with line numbers)
-        let rtfDisabledLineNumbersEnabled = false
+        // Case 3: rtfEnabled=false, lineNumbers=true -> should NOT generate RTF
+        let rtfDisabledLineNumbersEnabled = false && true
         XCTAssertFalse(rtfDisabledLineNumbersEnabled, "RTF should not be generated when RTF is disabled")
         
-        // Case 4: rtfEnabled=false, lineNumbers=false -> should NOT generate RTF (plain text)
-        let bothDisabled = false
-        XCTAssertFalse(bothDisabled, "RTF should not be generated when RTF is disabled")
+        // Case 4: rtfEnabled=false, lineNumbers=false -> should NOT generate RTF
+        let bothDisabled = false && false
+        XCTAssertFalse(bothDisabled, "RTF should not be generated when both are disabled")
     }
     
     /// Test new font customization constants

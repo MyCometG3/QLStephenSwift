@@ -87,8 +87,9 @@ struct TextFormatter {
             return textWithLineNumbers.data(using: .utf8)
         }
         
-        // If RTF is enabled, create attributed string (with or without line numbers)
-        if settings.rtfRenderingEnabled {
+        // If RTF is enabled, create attributed string
+        // RTF rendering requires line numbers to be enabled
+        if settings.rtfRenderingEnabled && settings.lineNumbersEnabled {
             let attributedString = createAttributedString(
                 from: text,
                 settings: settings

@@ -60,7 +60,7 @@ Render text previews as Rich Text Format (RTF) with customizable fonts, colors, 
 - **UI Control**: Toggle switch in "RTF Rendering" section
 - **Default**: Off (disabled)
 - When enabled, text is rendered as RTF with attribute styling
-- **Note**: RTF rendering can be used independently of line numbers
+- **Note**: RTF rendering requires line numbers to be enabled
 
 #### Font and Color Settings
 Font and color settings can be configured through the application UI when RTF rendering is enabled, or via the `defaults` command for advanced settings.
@@ -163,10 +163,8 @@ The two features can be used independently or together:
    - Uses UTF-8 encoding
 
 3. **Line Numbers OFF, RTF ON**
-   - RTF rendering with styled fonts and colors
-   - No line numbers shown
-   - **Font and color customization available through UI**
-   - Colors automatically adapt to Light/Dark mode
+   - Not supported - RTF requires line numbers to be enabled
+   - The RTF toggle will be disabled when line numbers are off
 
 4. **Line Numbers ON, RTF ON**
    - RTF rendering with line numbers
