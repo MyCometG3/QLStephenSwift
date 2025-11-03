@@ -222,7 +222,7 @@ struct TextFormatter {
             result.append(contentString)
             
             // Add newline except for last line (if original didn't have trailing newline)
-            if index < lines.count - 1 || text.hasSuffix("\n") || text.hasSuffix("\r") {
+            if index < lines.count - 1 || text.hasSuffix("\r\n") || text.hasSuffix("\n") || text.hasSuffix("\r") {
                 let newlineString = NSAttributedString(string: "\n", attributes: contentAttributes)
                 result.append(newlineString)
             }
