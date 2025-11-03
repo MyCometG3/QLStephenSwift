@@ -107,7 +107,9 @@ struct TextFormatter {
     
     /// Add line numbers to text
     private static func addLineNumbers(to text: String, separator: String) -> String {
-        let lines = text.components(separatedBy: .newlines)
+        // Split on line breaks while preserving line structure
+        // This handles LF, CR, and CRLF correctly without creating empty elements
+        let lines = text.split(separator: /\r\n|\r|\n/, omittingEmptySubsequences: false).map(String.init)
         let lineCount = lines.count
         let digitWidth = max(AppConstants.LineNumbers.minDigits, String(lineCount).count)
         
@@ -133,7 +135,9 @@ struct TextFormatter {
     
     /// Create attributed string with formatting
     private static func createAttributedString(from text: String, settings: Settings) -> NSAttributedString {
-        let lines = text.components(separatedBy: .newlines)
+        // Split on line breaks while preserving line structure
+        // This handles LF, CR, and CRLF correctly without creating empty elements
+        let lines = text.split(separator: /\r\n|\r|\n/, omittingEmptySubsequences: false).map(String.init)
         let lineCount = lines.count
         let digitWidth = settings.lineNumbersEnabled ? max(AppConstants.LineNumbers.minDigits, String(lineCount).count) : 0
         
