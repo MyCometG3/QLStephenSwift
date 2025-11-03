@@ -156,8 +156,8 @@ struct TextFormatter {
         
         // Configure tab width
         if settings.tabWidthMode == AppConstants.RTF.TabWidthMode.characters.rawValue {
-            // Calculate tab width in points based on character width
-            let charWidth = contentFont.advancement(forGlyph: contentFont.glyph(withName: "m")).width
+            // Calculate tab width in points based on character width using NSString.size(withAttributes:)
+            let charWidth = ("m" as NSString).size(withAttributes: [.font: contentFont]).width
             let tabWidth = charWidth * CGFloat(settings.tabWidthValue)
             paragraphStyle.defaultTabInterval = tabWidth
         } else {
@@ -165,25 +165,38 @@ struct TextFormatter {
             paragraphStyle.defaultTabInterval = CGFloat(settings.tabWidthValue)
         }
         
-        // Line number attributes
+        // If line numbers are enabled and separator is a tab, set an explicit first tab stop so the first tab aligns
+        if settings.lineNumbersEnabled && settings.lineSeparator == "\t" {
+            // Calculate width of the line number area (digitWidth zeros) using NSString sizing
+            let digitString = String(repeating: "0", count: digitWidth)
+            let numberAreaWidth = (digitString as NSString).size(withAttributes: [.font: lineNumberFont]).width
+            let padding: CGFloat = 12.0 // small padding between numbers and content
+            let firstTabLocation = numberAreaWidth + padding
+            paragraphStyle.tabStops = [NSTextTab(textAlignment: .left, location: firstTabLocation)]
+        }
+        
+        // Line number attributes (do not include paragraphStyle here)
+        // Paragraph style will be applied to the whole paragraph range after it is built
         let lineNumberAttributes: [NSAttributedString.Key: Any] = [
             .font: lineNumberFont,
             .foregroundColor: lineNumberFgColor,
             .backgroundColor: lineNumberBgColor
         ]
         
-        // Content attributes
+        // Content attributes (do not include paragraphStyle here)
         let contentAttributes: [NSAttributedString.Key: Any] = [
             .font: contentFont,
             .foregroundColor: contentFgColor,
-            .backgroundColor: contentBgColor,
-            .paragraphStyle: paragraphStyle
+            .backgroundColor: contentBgColor
         ]
         
         let result = NSMutableAttributedString()
         
         for (index, line) in lines.enumerated() {
             let lineNumber = index + 1
+            
+            // Track paragraph start index so we can apply paragraphStyle to the full paragraph after building it
+            let paragraphStart = result.length
             
             // Add line number if enabled
             if settings.lineNumbersEnabled {
@@ -206,6 +219,12 @@ struct TextFormatter {
             if index < lines.count - 1 || text.hasSuffix("\n") {
                 let newlineString = NSAttributedString(string: "\n", attributes: contentAttributes)
                 result.append(newlineString)
+            }
+            
+            // Apply paragraphStyle to the entire paragraph that was just appended
+            let paragraphLength = result.length - paragraphStart
+            if paragraphLength > 0 {
+                result.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: paragraphStart, length: paragraphLength))
             }
         }
         
