@@ -448,52 +448,15 @@ struct ContentView: View {
     }
     
     /// Convert SwiftUI Color to hex string
+    /// Delegates to shared ColorUtilities to avoid code duplication
     private func colorToHex(_ color: Color) -> String {
-        let nsColor = NSColor(color)
-        // Try sRGB first, then deviceRGB as fallback
-        let rgbColor = nsColor.usingColorSpace(.sRGB) ?? nsColor.usingColorSpace(.deviceRGB)
-        guard let finalColor = rgbColor else {
-            return "#000000"
-        }
-        let r = Int(finalColor.redComponent * 255)
-        let g = Int(finalColor.greenComponent * 255)
-        let b = Int(finalColor.blueComponent * 255)
-        return String(format: "#%02X%02X%02X", r, g, b)
+        return ColorUtilities.colorToHex(color)
     }
     
     /// Convert hex string to SwiftUI Color
-    /// Supports #RRGGBB (6 chars) and #RRGGBBAA (8 chars) formats
+    /// Delegates to shared ColorUtilities to avoid code duplication
     private func colorFromHex(_ hex: String) -> Color? {
-        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
-        
-        // Validate length before parsing
-        let length = hexSanitized.count
-        guard length == 6 || length == 8 else {
-            return nil
-        }
-        
-        var rgb: UInt64 = 0
-        guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else {
-            return nil
-        }
-        
-        let r, g, b: Double
-        
-        if length == 6 {
-            // Format: #RRGGBB - red at bits 16-23, green at 8-15, blue at 0-7
-            r = Double((rgb & 0xFF0000) >> 16) / 255.0
-            g = Double((rgb & 0x00FF00) >> 8) / 255.0
-            b = Double(rgb & 0x0000FF) / 255.0
-        } else { // length == 8
-            // Format: #RRGGBBAA - red at bits 24-31, green at 16-23, blue at 8-15, alpha at 0-7
-            // Alpha is ignored in our use case (color pickers don't support opacity)
-            r = Double((rgb & 0xFF000000) >> 24) / 255.0
-            g = Double((rgb & 0x00FF0000) >> 16) / 255.0
-            b = Double((rgb & 0x0000FF00) >> 8) / 255.0
-        }
-        
-        return Color(red: r, green: g, blue: b)
+        return ColorUtilities.colorFromHex(hex)
     }
 }
 
