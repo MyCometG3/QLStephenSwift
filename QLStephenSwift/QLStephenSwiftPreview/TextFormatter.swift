@@ -36,20 +36,30 @@ struct TextFormatter {
         
         /// Load settings from UserDefaults
         static func load(from defaults: UserDefaults) -> Settings {
+            // Read font sizes once and use default if zero
+            let lineNumberFontSizeValue = defaults.double(forKey: AppConstants.RTF.lineNumberFontSizeKey)
+            let lineNumberFontSize = lineNumberFontSizeValue != 0 ? CGFloat(lineNumberFontSizeValue) : AppConstants.RTF.defaultLineNumberFontSize
+            
+            let contentFontSizeValue = defaults.double(forKey: AppConstants.RTF.contentFontSizeKey)
+            let contentFontSize = contentFontSizeValue != 0 ? CGFloat(contentFontSizeValue) : AppConstants.RTF.defaultContentFontSize
+            
+            let tabWidthValueValue = defaults.double(forKey: AppConstants.RTF.tabWidthValueKey)
+            let tabWidthValue = tabWidthValueValue != 0 ? tabWidthValueValue : AppConstants.RTF.defaultTabWidthValue
+            
             return Settings(
                 lineNumbersEnabled: defaults.bool(forKey: AppConstants.LineNumbers.enabledKey),
                 lineSeparator: defaults.string(forKey: AppConstants.LineNumbers.separatorKey) ?? AppConstants.LineNumbers.defaultSeparator,
                 rtfRenderingEnabled: defaults.bool(forKey: AppConstants.RTF.enabledKey),
                 lineNumberFontName: defaults.string(forKey: AppConstants.RTF.lineNumberFontNameKey) ?? AppConstants.RTF.defaultLineNumberFontName,
-                lineNumberFontSize: CGFloat(defaults.double(forKey: AppConstants.RTF.lineNumberFontSizeKey) != 0 ? defaults.double(forKey: AppConstants.RTF.lineNumberFontSizeKey) : AppConstants.RTF.defaultLineNumberFontSize),
+                lineNumberFontSize: lineNumberFontSize,
                 lineNumberForegroundColor: defaults.string(forKey: AppConstants.RTF.lineNumberForegroundColorKey) ?? AppConstants.RTF.defaultLineNumberForegroundColor,
                 lineNumberBackgroundColor: defaults.string(forKey: AppConstants.RTF.lineNumberBackgroundColorKey) ?? AppConstants.RTF.defaultLineNumberBackgroundColor,
                 contentFontName: defaults.string(forKey: AppConstants.RTF.contentFontNameKey) ?? AppConstants.RTF.defaultContentFontName,
-                contentFontSize: CGFloat(defaults.double(forKey: AppConstants.RTF.contentFontSizeKey) != 0 ? defaults.double(forKey: AppConstants.RTF.contentFontSizeKey) : AppConstants.RTF.defaultContentFontSize),
+                contentFontSize: contentFontSize,
                 contentForegroundColor: defaults.string(forKey: AppConstants.RTF.contentForegroundColorKey) ?? AppConstants.RTF.defaultContentForegroundColor,
                 contentBackgroundColor: defaults.string(forKey: AppConstants.RTF.contentBackgroundColorKey) ?? AppConstants.RTF.defaultContentBackgroundColor,
                 tabWidthMode: defaults.string(forKey: AppConstants.RTF.tabWidthModeKey) ?? AppConstants.RTF.defaultTabWidthMode,
-                tabWidthValue: defaults.double(forKey: AppConstants.RTF.tabWidthValueKey) != 0 ? defaults.double(forKey: AppConstants.RTF.tabWidthValueKey) : AppConstants.RTF.defaultTabWidthValue
+                tabWidthValue: tabWidthValue
             )
         }
     }
