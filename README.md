@@ -25,6 +25,8 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
   - Western encodings (Windows-1252, MacRoman)
 - ✅ Intelligent encoding detection with priority-based fallback
 - ✅ Configurable maximum file size limit
+- ✅ **Line number display** (optional, configurable separator)
+- ✅ **RTF rendering** with customizable fonts, colors, and tab widths
 - ✅ macOS 15+ compatible (no external process dependencies)
 - ✅ Excludes binary files and `.DS_Store`
 
@@ -70,10 +72,19 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 Configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
 
 ```bash
-defaults write com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
+defaults write group.com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
 ```
 
 Valid range: 102400-10485760 bytes (100KB-10MB)
+
+### Line Numbers and RTF Rendering
+
+New features for enhanced text preview:
+
+- **Line Numbers**: Display line numbers with configurable separator (space, colon, pipe, tab)
+- **RTF Rendering**: Rich text output with customizable fonts, colors, and tab widths
+
+These features can be enabled/disabled via the application UI. For detailed configuration options and advanced settings, see [FEATURES.md](FEATURES.md).
 
 ### Migration from Original QLStephen
 
