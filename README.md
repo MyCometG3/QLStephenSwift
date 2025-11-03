@@ -25,6 +25,9 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
   - Western encodings (Windows-1252, MacRoman)
 - ✅ Intelligent encoding detection with priority-based fallback
 - ✅ Configurable maximum file size limit
+- ✅ **Line number display** (optional, configurable separator)
+- ✅ **RTF rendering** with customizable fonts, colors, and tab widths
+- ✅ **Line ending preservation** (LF, CR, CRLF automatically detected and maintained)
 - ✅ macOS 15+ compatible (no external process dependencies)
 - ✅ Excludes binary files and `.DS_Store`
 
@@ -70,10 +73,19 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 Configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
 
 ```bash
-defaults write com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
+defaults write group.com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
 ```
 
 Valid range: 102400-10485760 bytes (100KB-10MB)
+
+### Line Numbers and RTF Rendering
+
+New features for enhanced text preview:
+
+- **Line Numbers**: Display line numbers with configurable separator (space, colon, pipe, tab)
+- **RTF Rendering**: Rich text output with customizable fonts, colors, and tab widths
+
+These features can be enabled/disabled via the application UI. For detailed configuration options and advanced settings, see [FEATURES.md](docs/FEATURES.md).
 
 ### Migration from Original QLStephen
 
@@ -105,6 +117,15 @@ Adaptive reading strategy based on file size:
 Binary classification rules (applied to sampled data):
 - **Immediate rejection**: Any null byte (0x00) → classified as binary
 - **Statistical analysis**: Control characters (excluding TAB/LF/CR/FF) > 30% → classified as binary
+
+### Line Ending Handling
+
+The formatter automatically detects and preserves the original line ending style:
+- **LF** (`\n`) - Unix/Linux/macOS
+- **CRLF** (`\r\n`) - Windows
+- **CR** (`\r`) - Classic Mac OS
+
+Detection uses single-pass iteration for efficiency, and the original style is maintained throughout formatted output.
 
 ### Encoding Detection
 

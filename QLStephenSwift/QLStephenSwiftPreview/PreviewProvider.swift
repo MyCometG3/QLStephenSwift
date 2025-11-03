@@ -15,7 +15,7 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
         let fileURL = request.fileURL
         
-        // Ignore .DS_Store files
+        // Ignore .DS_Store files to avoid displaying system metadata
         if fileURL.lastPathComponent == ".DS_Store" {
             throw PreviewError.unsupportedFile
         }
@@ -27,21 +27,32 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             throw PreviewError.notTextFile
         }
         
-        // Get max file size from user defaults
+        // Get max file size from user defaults (may truncate large files)
         let maxFileSize = getMaxFileSize()
         
-        // Get file size
+        // Get formatting settings (line numbers, RTF, fonts, colors, etc.)
+        let settings = getFormattingSettings()
+        
+        // Get file size for truncation decision
         let fileManager = FileManager.default
         guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
               let fileSize = attributes[.size] as? Int else {
             throw PreviewError.cannotReadFile
         }
         
-        let contentType = UTType.plainText
+        // Determine content type based on RTF rendering setting
+        // RTF allows styled output with fonts and colors
+        let contentType: UTType
+        if settings.rtfRenderingEnabled {
+            contentType = UTType.rtf
+        } else {
+            contentType = UTType.plainText
+        }
         
         let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
             var data: Data
             
+            // Truncate large files to respect maxFileSize setting
             if fileSize > maxFileSize {
                 // Read only up to maxFileSize
                 guard let fileHandle = try? FileHandle(forReadingFrom: fileURL),
@@ -51,15 +62,41 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
                 try? fileHandle.close()
                 data = limitedData
             } else {
-                // Read entire file
+                // Read entire file for files within size limit
                 guard let fileData = try? Data(contentsOf: fileURL) else {
                     return Data()
                 }
                 data = fileData
             }
             
-            reply.stringEncoding = analysisResult.encoding
-            return data
+            // If line numbers or RTF rendering are enabled, format the text
+            if settings.lineNumbersEnabled || settings.rtfRenderingEnabled {
+                // Decode the text using detected encoding
+                guard let text = String(data: data, encoding: analysisResult.encoding) else {
+                    // Fallback: return original data if decoding fails
+                    reply.stringEncoding = analysisResult.encoding
+                    return data
+                }
+                
+                // Format the text with line numbers and/or RTF
+                if let formattedData = TextFormatter.format(text: text, with: settings) {
+                    // For RTF, don't set stringEncoding (RTF has its own encoding)
+                    // For plain text with line numbers, use UTF-8
+                    if !settings.rtfRenderingEnabled {
+                        reply.stringEncoding = .utf8
+                    }
+                    return formattedData
+                } else {
+                    // Fallback: return original data if formatting fails
+                    reply.stringEncoding = analysisResult.encoding
+                    return data
+                }
+            } else {
+                // Original behavior: return raw data with detected encoding
+                // No formatting, no line numbers, preserves original encoding
+                reply.stringEncoding = analysisResult.encoding
+                return data
+            }
         }
         
         return reply
@@ -95,6 +132,31 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         }
         
         return AppConstants.FileSize.defaultMaxBytes
+    }
+    
+    /// Retrieves formatting settings from shared storage
+    /// - Returns: TextFormatter settings
+    private func getFormattingSettings() -> TextFormatter.Settings {
+        if let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) {
+            return TextFormatter.Settings.load(from: sharedDefaults)
+        }
+        
+        // Fallback to default settings if shared defaults unavailable
+        return TextFormatter.Settings(
+            lineNumbersEnabled: AppConstants.LineNumbers.defaultEnabled,
+            lineSeparator: AppConstants.LineNumbers.defaultSeparator,
+            rtfRenderingEnabled: AppConstants.RTF.defaultEnabled,
+            lineNumberFontName: AppConstants.RTF.defaultLineNumberFontName,
+            lineNumberFontSize: AppConstants.RTF.defaultLineNumberFontSize,
+            lineNumberForegroundColor: AppConstants.RTF.defaultLineNumberForegroundColor,
+            lineNumberBackgroundColor: AppConstants.RTF.defaultLineNumberBackgroundColor,
+            contentFontName: AppConstants.RTF.defaultContentFontName,
+            contentFontSize: AppConstants.RTF.defaultContentFontSize,
+            contentForegroundColor: AppConstants.RTF.defaultContentForegroundColor,
+            contentBackgroundColor: AppConstants.RTF.defaultContentBackgroundColor,
+            tabWidthMode: AppConstants.RTF.defaultTabWidthMode,
+            tabWidthValue: AppConstants.RTF.defaultTabWidthValue
+        )
     }
 }
 
