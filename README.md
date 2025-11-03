@@ -171,6 +171,32 @@ QLStephenSwift modernizes the approach:
 3. Restart Finder: `killall Finder`
 4. Check which extension handles files: `qlmanage -m | grep public.data`
 
+### Verifying App Extension Installation
+
+QLStephenSwift uses the modern App Extension architecture (`.appex`), not legacy Quick Look Generators (`.qlgenerator`). To verify and manage the extension, use the `pluginkit` command:
+
+**List all Quick Look Preview extensions:**
+```bash
+pluginkit -m -p com.apple.quicklook.preview
+```
+
+**Find QLStephenSwift extension specifically:**
+```bash
+pluginkit -m -i com.mycometg3.qlstephenswift.qlstephenswiftpreview
+```
+
+Alternatively, filter by protocol:
+```bash
+pluginkit -m -p com.apple.quicklook.preview | grep -i qlstephen
+```
+
+**Force re-register the extension (if not appearing):**
+```bash
+pluginkit -a /Applications/QLStephenSwift.app/Contents/PlugIns/QLStephenSwiftPreview.appex
+```
+
+**Note:** The `qlmanage` command is useful for testing previews and clearing caches, but `pluginkit` is the proper tool for managing App Extension-based Quick Look plugins. Legacy `.qlgenerator` plugins are deprecated in modern macOS versions.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
