@@ -15,7 +15,7 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
         let fileURL = request.fileURL
         
-        // Ignore .DS_Store files
+        // Ignore .DS_Store files to avoid displaying system metadata
         if fileURL.lastPathComponent == ".DS_Store" {
             throw PreviewError.unsupportedFile
         }
@@ -27,20 +27,21 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             throw PreviewError.notTextFile
         }
         
-        // Get max file size from user defaults
+        // Get max file size from user defaults (may truncate large files)
         let maxFileSize = getMaxFileSize()
         
-        // Get formatting settings
+        // Get formatting settings (line numbers, RTF, fonts, colors, etc.)
         let settings = getFormattingSettings()
         
-        // Get file size
+        // Get file size for truncation decision
         let fileManager = FileManager.default
         guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
               let fileSize = attributes[.size] as? Int else {
             throw PreviewError.cannotReadFile
         }
         
-        // Determine content type based on formatting settings
+        // Determine content type based on RTF rendering setting
+        // RTF allows styled output with fonts and colors
         let contentType: UTType
         if settings.rtfRenderingEnabled {
             contentType = UTType.rtf
@@ -51,6 +52,7 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
             var data: Data
             
+            // Truncate large files to respect maxFileSize setting
             if fileSize > maxFileSize {
                 // Read only up to maxFileSize
                 guard let fileHandle = try? FileHandle(forReadingFrom: fileURL),
@@ -60,7 +62,7 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
                 try? fileHandle.close()
                 data = limitedData
             } else {
-                // Read entire file
+                // Read entire file for files within size limit
                 guard let fileData = try? Data(contentsOf: fileURL) else {
                     return Data()
                 }
@@ -78,7 +80,8 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
                 
                 // Format the text with line numbers and/or RTF
                 if let formattedData = TextFormatter.format(text: text, with: settings) {
-                    // For RTF, don't set stringEncoding
+                    // For RTF, don't set stringEncoding (RTF has its own encoding)
+                    // For plain text with line numbers, use UTF-8
                     if !settings.rtfRenderingEnabled {
                         reply.stringEncoding = .utf8
                     }
@@ -89,7 +92,8 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
                     return data
                 }
             } else {
-                // Original behavior: return raw data with encoding
+                // Original behavior: return raw data with detected encoding
+                // No formatting, no line numbers, preserves original encoding
                 reply.stringEncoding = analysisResult.encoding
                 return data
             }
