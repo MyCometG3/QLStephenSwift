@@ -311,10 +311,16 @@ struct ContentView: View {
         // Load RTF rendering settings
         rtfRenderingEnabled = sharedDefaults.bool(forKey: AppConstants.RTF.enabledKey)
         
-        // Load font settings
+        // Load font settings with proper fallback chain
         let storedFontName = sharedDefaults.string(forKey: AppConstants.RTF.contentFontNameKey) ?? AppConstants.RTF.defaultContentFontName
-        // Validate that stored font is available, fallback to default if not
-        contentFontName = availableFonts.contains(storedFontName) ? storedFontName : AppConstants.RTF.defaultContentFontName
+        // Validate that stored font is available, fallback to default, then first available
+        if availableFonts.contains(storedFontName) {
+            contentFontName = storedFontName
+        } else if availableFonts.contains(AppConstants.RTF.defaultContentFontName) {
+            contentFontName = AppConstants.RTF.defaultContentFontName
+        } else {
+            contentFontName = availableFonts.first ?? AppConstants.RTF.defaultContentFontName
+        }
         let fontSizeValue = sharedDefaults.double(forKey: AppConstants.RTF.contentFontSizeKey)
         contentFontSize = fontSizeValue != 0 ? CGFloat(fontSizeValue) : AppConstants.RTF.defaultContentFontSize
         
