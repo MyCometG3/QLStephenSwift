@@ -82,7 +82,8 @@ struct TextFormatter {
         }
         
         // If RTF is enabled, create attributed string
-        if settings.rtfRenderingEnabled {
+        // RTF rendering requires line numbers to be enabled
+        if settings.rtfRenderingEnabled && settings.lineNumbersEnabled {
             let attributedString = createAttributedString(
                 from: text,
                 settings: settings
