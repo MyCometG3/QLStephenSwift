@@ -453,31 +453,35 @@ struct ContentView: View {
     }
     
     /// Convert hex string to SwiftUI Color
+    /// Supports #RRGGBB (6 chars) and #RRGGBBAA (8 chars) formats
     private func colorFromHex(_ hex: String) -> Color? {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+        
+        // Validate length before parsing
+        let length = hexSanitized.count
+        guard length == 6 || length == 8 else {
+            return nil
+        }
         
         var rgb: UInt64 = 0
         guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else {
             return nil
         }
         
-        let length = hexSanitized.count
         let r, g, b: Double
         
         if length == 6 {
-            // Format: #RRGGBB
+            // Format: #RRGGBB - red at bits 16-23, green at 8-15, blue at 0-7
             r = Double((rgb & 0xFF0000) >> 16) / 255.0
             g = Double((rgb & 0x00FF00) >> 8) / 255.0
             b = Double(rgb & 0x0000FF) / 255.0
-        } else if length == 8 {
-            // Format: #RRGGBBAA (alpha ignored for our use case)
+        } else { // length == 8
+            // Format: #RRGGBBAA - red at bits 24-31, green at 16-23, blue at 8-15, alpha at 0-7
+            // Alpha is ignored in our use case (color pickers don't support opacity)
             r = Double((rgb & 0xFF000000) >> 24) / 255.0
             g = Double((rgb & 0x00FF0000) >> 16) / 255.0
             b = Double((rgb & 0x0000FF00) >> 8) / 255.0
-            // Alpha: Double(rgb & 0x000000FF) / 255.0
-        } else {
-            return nil
         }
         
         return Color(red: r, green: g, blue: b)
