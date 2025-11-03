@@ -111,16 +111,21 @@ struct TextFormatter {
         let lineCount = lines.count
         let digitWidth = max(AppConstants.LineNumbers.minDigits, String(lineCount).count)
         
-        var result = ""
+        // Use array and join for better performance with large files
+        var numberedLines: [String] = []
+        numberedLines.reserveCapacity(lineCount)
+        
         for (index, line) in lines.enumerated() {
             let lineNumber = index + 1
             let paddedNumber = String(format: "%0\(digitWidth)d", lineNumber)
-            result += "\(paddedNumber)\(separator)\(line)\n"
+            numberedLines.append("\(paddedNumber)\(separator)\(line)")
         }
         
-        // Remove trailing newline if original text didn't have one
-        if !text.hasSuffix("\n") && result.hasSuffix("\n") {
-            result.removeLast()
+        var result = numberedLines.joined(separator: "\n")
+        
+        // Add trailing newline if original text had one
+        if text.hasSuffix("\n") {
+            result.append("\n")
         }
         
         return result
@@ -182,7 +187,10 @@ struct TextFormatter {
                 let lineNumberString = NSAttributedString(string: paddedNumber, attributes: lineNumberAttributes)
                 result.append(lineNumberString)
                 
-                let separatorString = NSAttributedString(string: settings.lineSeparator, attributes: lineNumberAttributes)
+                // For tab separator, use content attributes so it respects tab stops
+                // For other separators, use line number attributes
+                let separatorAttributes = (settings.lineSeparator == "\t") ? contentAttributes : lineNumberAttributes
+                let separatorString = NSAttributedString(string: settings.lineSeparator, attributes: separatorAttributes)
                 result.append(separatorString)
             }
             
