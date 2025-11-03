@@ -12,86 +12,185 @@ struct ContentView: View {
     @State private var maxFileSize: Int = AppConstants.FileSize.defaultMaxBytes
     @State private var maxFileSizeKBText: String = ""
     
+    // Line number settings
+    @State private var lineNumbersEnabled: Bool = false
+    @State private var lineSeparator: String = " | "
+    
+    // RTF rendering settings
+    @State private var rtfRenderingEnabled: Bool = false
+    
+    // Advanced settings expanded state
+    @State private var showAdvancedSettings: Bool = false
+    
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            VStack(spacing: 8) {
-                Image(systemName: "doc.text.magnifyingglass")
-                    .font(.system(size: 48))
-                    .foregroundColor(.blue)
-                
-                Text("QLStephenSwift")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                Text("QuickLook Extension for Text Files")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
-            Divider()
-            
-            // Settings
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Settings")
-                    .font(.headline)
-                
-                HStack {
-                    Text("Max File Size:")
-                        .frame(width: 120, alignment: .trailing)
+        ScrollView {
+            VStack(spacing: 20) {
+                // Header
+                VStack(spacing: 8) {
+                    Image(systemName: "doc.text.magnifyingglass")
+                        .font(.system(size: 48))
+                        .foregroundColor(.blue)
                     
-                    TextField("100", text: $maxFileSizeKBText)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 80)
-                        .onSubmit {
-                            updateMaxFileSize()
+                    Text("QLStephenSwift")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    Text("QuickLook Extension for Text Files")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Divider()
+                
+                // Settings
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Settings")
+                        .font(.headline)
+                    
+                    HStack {
+                        Text("Max File Size:")
+                            .frame(width: 120, alignment: .trailing)
+                        
+                        TextField("100", text: $maxFileSizeKBText)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                            .onSubmit {
+                                updateMaxFileSize()
+                            }
+                        
+                        Text("KB")
+                        
+                        Spacer()
+                    }
+                    
+                    Text("Files larger than this will be truncated")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 120)
+                    
+                    Text("Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 120)
+                }
+                .padding(.horizontal)
+                
+                Divider()
+                
+                // Line Numbers
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Line Numbers")
+                        .font(.headline)
+                    
+                    Toggle(isOn: $lineNumbersEnabled) {
+                        Text("Show Line Numbers")
+                    }
+                    .onChange(of: lineNumbersEnabled) { _, _ in
+                        saveRenderingSettings()
+                    }
+                    
+                    HStack {
+                        Text("Separator:")
+                            .frame(width: 120, alignment: .trailing)
+                        
+                        Picker("", selection: $lineSeparator) {
+                            Text("Space").tag(" ")
+                            Text("Pipe (|)").tag(" | ")
+                            Text("Colon (:)").tag(": ")
+                            Text("Tab").tag("\t")
                         }
+                        .frame(width: 150)
+                        .onChange(of: lineSeparator) { _, _ in
+                            saveRenderingSettings()
+                        }
+                        
+                        Spacer()
+                    }
                     
-                    Text("KB")
+                    Text("Line numbers are zero-padded with minimum 4 digits")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 120)
+                }
+                .padding(.horizontal)
+                
+                Divider()
+                
+                // RTF Rendering
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("RTF Rendering")
+                        .font(.headline)
                     
-                    Spacer()
+                    Toggle(isOn: $rtfRenderingEnabled) {
+                        Text("Enable RTF Rendering")
+                    }
+                    .onChange(of: rtfRenderingEnabled) { _, _ in
+                        saveRenderingSettings()
+                    }
+                    
+                    Text("Rich Text Format with custom fonts and colors")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 20)
+                    
+                    // Advanced Settings Disclosure
+                    DisclosureGroup("Advanced Font & Tab Settings", isExpanded: $showAdvancedSettings) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Configure in defaults:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("• Line number font: lineNumberFontName, lineNumberFontSize")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("• Content font: contentFontName, contentFontSize")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("• Tab width: tabWidthMode (characters/points), tabWidthValue")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("• Colors: *TextColor, *BackgroundColor (hex format)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.leading, 20)
+                    }
                 }
+                .padding(.horizontal)
                 
-                Text("Files larger than this will be truncated")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.leading, 120)
+                Divider()
                 
-                Text("Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.leading, 120)
+                // Links
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("About")
+                        .font(.headline)
+                    
+                    HStack {
+                        Text("Swift Version:")
+                            .frame(width: 120, alignment: .trailing)
+                        Link("github.com/MyCometG3/QLStephenSwift",
+                             destination: URL(string: "https://github.com/MyCometG3/QLStephenSwift")!)
+                        Spacer()
+                    }
+                    
+                    HStack {
+                        Text("Original:")
+                            .frame(width: 120, alignment: .trailing)
+                        Link("github.com/whomwah/qlstephen",
+                             destination: URL(string: "https://github.com/whomwah/qlstephen")!)
+                        Spacer()
+                    }
+                }
+                .padding(.horizontal)
+                
+                Spacer()
             }
-            .padding(.horizontal)
-            
-            Divider()
-            
-            // Links
-            VStack(alignment: .leading, spacing: 8) {
-                Text("About")
-                    .font(.headline)
-                
-                HStack {
-                    Text("Swift Version:")
-                        .frame(width: 120, alignment: .trailing)
-                    Link("github.com/MyCometG3/QLStephenSwift",
-                         destination: URL(string: "https://github.com/MyCometG3/QLStephenSwift")!)
-                    Spacer()
-                }
-                
-                HStack {
-                    Text("Original:")
-                        .frame(width: 120, alignment: .trailing)
-                    Link("github.com/whomwah/qlstephen",
-                         destination: URL(string: "https://github.com/whomwah/qlstephen")!)
-                    Spacer()
-                }
-            }
-            .padding(.horizontal)
-            
-            Spacer()
+            .padding()
         }
-        .padding()
+        .frame(width: 600, height: 650)
         .onAppear {
             loadSettings()
         }
@@ -115,6 +214,23 @@ struct ContentView: View {
         }
         
         maxFileSizeKBText = String(maxFileSize / AppConstants.FileSize.bytesPerKB)
+        
+        // Load rendering settings
+        let renderSettings = TextRenderingSettings()
+        lineNumbersEnabled = renderSettings.lineNumbersEnabled
+        lineSeparator = renderSettings.lineSeparator
+        rtfRenderingEnabled = renderSettings.rtfRenderingEnabled
+    }
+    
+    /// Saves rendering settings to shared UserDefaults
+    private func saveRenderingSettings() {
+        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
+            return
+        }
+        
+        sharedDefaults.set(lineNumbersEnabled, forKey: "lineNumbersEnabled")
+        sharedDefaults.set(lineSeparator, forKey: "lineSeparator")
+        sharedDefaults.set(rtfRenderingEnabled, forKey: "rtfRenderingEnabled")
     }
     
     /// Migrates settings from legacy storage locations to App Group shared storage

@@ -37,7 +37,13 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             throw PreviewError.cannotReadFile
         }
         
-        let contentType = UTType.plainText
+        // Load rendering settings
+        let settings = TextRenderingSettings()
+        
+        // Determine if we need RTF rendering
+        let needsRTFRendering = settings.rtfRenderingEnabled && (settings.lineNumbersEnabled || hasCustomFormatting(settings))
+        
+        let contentType = needsRTFRendering ? UTType.rtf : UTType.plainText
         
         let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
             var data: Data
@@ -58,11 +64,45 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
                 data = fileData
             }
             
+            // Convert data to string using detected encoding
+            guard let text = String(data: data, encoding: analysisResult.encoding) else {
+                reply.stringEncoding = analysisResult.encoding
+                return data
+            }
+            
+            // Apply line numbers if enabled (for plain text mode)
+            var outputText = text
+            if settings.lineNumbersEnabled && !needsRTFRendering {
+                outputText = LineNumberFormatter.addLineNumbers(to: text, separator: settings.lineSeparator)
+            }
+            
+            // Generate RTF if needed
+            if needsRTFRendering {
+                if let rtfData = RTFGenerator.generateRTF(text: text, settings: settings, encoding: analysisResult.encoding) {
+                    return rtfData
+                } else {
+                    // Fallback to plain text if RTF generation fails
+                    if settings.lineNumbersEnabled {
+                        outputText = LineNumberFormatter.addLineNumbers(to: text, separator: settings.lineSeparator)
+                    }
+                    reply.stringEncoding = analysisResult.encoding
+                    return outputText.data(using: analysisResult.encoding) ?? data
+                }
+            }
+            
+            // Return plain text
             reply.stringEncoding = analysisResult.encoding
-            return data
+            return outputText.data(using: analysisResult.encoding) ?? data
         }
         
         return reply
+    }
+    
+    /// Checks if custom formatting is enabled
+    private func hasCustomFormatting(_ settings: TextRenderingSettings) -> Bool {
+        // Check if any non-default formatting is applied
+        // For simplicity, we always consider RTF enabled as having custom formatting
+        return true
     }
     
     /// Retrieves the maximum file size setting from shared storage
