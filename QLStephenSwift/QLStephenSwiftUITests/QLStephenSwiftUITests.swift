@@ -41,8 +41,9 @@ final class QLStephenSwiftUITests: XCTestCase {
     }
     
     @MainActor
-    func testRTFToggleDependsOnLineNumbers() throws {
-        // Test that the RTF Output toggle is disabled when Line Numbers are disabled
+    func testRTFToggleIndependentOfLineNumbers() throws {
+        // Test that the RTF Output toggle works independently of Line Numbers toggle
+        // RTF rendering can be enabled with or without line numbers
         let app = XCUIApplication()
         app.launch()
         
@@ -56,24 +57,25 @@ final class QLStephenSwiftUITests: XCTestCase {
         // Ensure RTF toggle exists
         XCTAssertTrue(rtfToggle.exists, "RTF toggle should exist")
         
+        // Verify that RTF toggle is always enabled regardless of line numbers state
         // If line numbers are enabled, turn them off
         if lineNumbersToggle.value as? String == "1" {
             lineNumbersToggle.tap()
         }
         
-        // Verify that when line numbers are off, RTF toggle is disabled (grayed out)
-        XCTAssertFalse(rtfToggle.isEnabled, "RTF toggle should be disabled when line numbers are off")
+        // RTF toggle should be enabled even when line numbers are off
+        XCTAssertTrue(rtfToggle.isEnabled, "RTF toggle should be enabled even when line numbers are off")
         
         // Enable line numbers
         lineNumbersToggle.tap()
         
-        // Verify that when line numbers are on, RTF toggle is enabled
+        // RTF toggle should still be enabled when line numbers are on
         XCTAssertTrue(rtfToggle.isEnabled, "RTF toggle should be enabled when line numbers are on")
         
         // Disable line numbers again
         lineNumbersToggle.tap()
         
-        // Verify RTF toggle remains disabled (grayed out) when line numbers are off
-        XCTAssertFalse(rtfToggle.isEnabled, "RTF toggle should remain disabled when line numbers are off")
+        // RTF toggle should remain enabled when line numbers are off again
+        XCTAssertTrue(rtfToggle.isEnabled, "RTF toggle should remain enabled when line numbers are off")
     }
 }

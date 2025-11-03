@@ -60,7 +60,7 @@ Render text previews as Rich Text Format (RTF) with customizable fonts, colors, 
 - **UI Control**: Toggle switch in "RTF Rendering" section
 - **Default**: Off (disabled)
 - When enabled, text is rendered as RTF with attribute styling
-- **Note**: RTF rendering requires line numbers to be enabled
+- **Note**: RTF rendering can be used independently or together with line numbers
 
 #### Font and Color Settings
 Font and color settings can be configured through the application UI when RTF rendering is enabled, or via the `defaults` command for advanced settings.
@@ -163,8 +163,10 @@ The two features can be used independently or together:
    - Uses UTF-8 encoding
 
 3. **Line Numbers OFF, RTF ON**
-   - Not supported - RTF requires line numbers to be enabled
-   - The RTF toggle will be disabled when line numbers are off
+   - RTF rendering with styled text only (no line numbers)
+   - Content uses customizable font/color attributes
+   - Tab width can be customized
+   - Colors automatically adapt to Light/Dark mode
 
 4. **Line Numbers ON, RTF ON**
    - RTF rendering with line numbers
@@ -209,13 +211,14 @@ Output (RTF):
 Settings:
 - Line Numbers: OFF
 - RTF: ON
-- Content Font: Monaco, 12pt, Dark Blue on Light Yellow
+- Content Font: Monaco, 12pt
+- Text Color: Black on White (Light Mode)
 
 Output (RTF):
 #!/bin/bash
 echo "Hello World"
 exit 0
-(styled with Monaco 12pt in dark blue on light yellow background)
+(styled with Monaco 12pt in black on white background)
 ```
 
 ## Technical Notes
