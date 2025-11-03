@@ -197,8 +197,9 @@ struct TextFormatter {
         let contentBgColorDark = colorFromHex(settings.contentBackgroundColorDark) ?? NSColor(white: 0.118, alpha: 1.0)
         
         // Create dynamic colors that automatically switch based on appearance
+        // Use bestMatch to determine if appearance is dark variant
         let contentFgColor = NSColor(name: nil) { appearance in
-            if appearance.name == .darkAqua || appearance.name == .vibrantDark || appearance.name == .accessibilityHighContrastDarkAqua || appearance.name == .accessibilityHighContrastVibrantDark {
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
                 return contentFgColorDark
             } else {
                 return contentFgColorLight
@@ -206,7 +207,7 @@ struct TextFormatter {
         }
         
         let contentBgColor = NSColor(name: nil) { appearance in
-            if appearance.name == .darkAqua || appearance.name == .vibrantDark || appearance.name == .accessibilityHighContrastDarkAqua || appearance.name == .accessibilityHighContrastVibrantDark {
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
                 return contentBgColorDark
             } else {
                 return contentBgColorLight

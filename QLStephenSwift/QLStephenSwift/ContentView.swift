@@ -441,12 +441,14 @@ struct ContentView: View {
     /// Convert SwiftUI Color to hex string
     private func colorToHex(_ color: Color) -> String {
         let nsColor = NSColor(color)
-        guard let rgbColor = nsColor.usingColorSpace(.deviceRGB) else {
+        // Try sRGB first, then deviceRGB as fallback
+        let rgbColor = nsColor.usingColorSpace(.sRGB) ?? nsColor.usingColorSpace(.deviceRGB)
+        guard let finalColor = rgbColor else {
             return "#000000"
         }
-        let r = Int(rgbColor.redComponent * 255)
-        let g = Int(rgbColor.greenComponent * 255)
-        let b = Int(rgbColor.blueComponent * 255)
+        let r = Int(finalColor.redComponent * 255)
+        let g = Int(finalColor.greenComponent * 255)
+        let b = Int(finalColor.blueComponent * 255)
         return String(format: "#%02X%02X%02X", r, g, b)
     }
     
@@ -464,13 +466,16 @@ struct ContentView: View {
         let r, g, b: Double
         
         if length == 6 {
+            // Format: #RRGGBB
             r = Double((rgb & 0xFF0000) >> 16) / 255.0
             g = Double((rgb & 0x00FF00) >> 8) / 255.0
             b = Double(rgb & 0x0000FF) / 255.0
         } else if length == 8 {
+            // Format: #RRGGBBAA (alpha ignored for our use case)
             r = Double((rgb & 0xFF000000) >> 24) / 255.0
             g = Double((rgb & 0x00FF0000) >> 16) / 255.0
             b = Double((rgb & 0x0000FF00) >> 8) / 255.0
+            // Alpha: Double(rgb & 0x000000FF) / 255.0
         } else {
             return nil
         }
