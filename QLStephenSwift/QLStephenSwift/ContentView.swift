@@ -80,11 +80,6 @@ struct ContentView: View {
                             .toggleStyle(.switch)
                             .onChange(of: lineNumbersEnabled) { _, newValue in
                                 saveLineNumbersEnabled(newValue)
-                                // Automatically disable RTF when line numbers are disabled
-                                if !newValue && rtfRenderingEnabled {
-                                    rtfRenderingEnabled = false
-                                    saveRTFEnabled(false)
-                                }
                             }
                         
                         Spacer()

@@ -61,7 +61,7 @@ final class QLStephenSwiftUITests: XCTestCase {
             lineNumbersToggle.tap()
         }
         
-        // Verify that when line numbers are off, RTF toggle is disabled
+        // Verify that when line numbers are off, RTF toggle is disabled (grayed out)
         XCTAssertFalse(rtfToggle.isEnabled, "RTF toggle should be disabled when line numbers are off")
         
         // Enable line numbers
@@ -70,15 +70,10 @@ final class QLStephenSwiftUITests: XCTestCase {
         // Verify that when line numbers are on, RTF toggle is enabled
         XCTAssertTrue(rtfToggle.isEnabled, "RTF toggle should be enabled when line numbers are on")
         
-        // Enable RTF
-        if rtfToggle.value as? String == "0" {
-            rtfToggle.tap()
-        }
-        
         // Disable line numbers again
         lineNumbersToggle.tap()
         
-        // Verify RTF is automatically disabled
-        XCTAssertEqual(rtfToggle.value as? String, "0", "RTF should be automatically disabled when line numbers are turned off")
+        // Verify RTF toggle remains disabled (grayed out) when line numbers are off
+        XCTAssertFalse(rtfToggle.isEnabled, "RTF toggle should remain disabled when line numbers are off")
     }
 }
