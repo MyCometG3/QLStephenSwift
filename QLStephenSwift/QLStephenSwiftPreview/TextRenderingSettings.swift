@@ -111,23 +111,15 @@ struct TextRenderingSettings {
         
         // Load line number font settings
         self.lineNumberFontName = sharedDefaults.string(forKey: Keys.lineNumberFontName) ?? Defaults.lineNumberFontName
-        self.lineNumberFontSize = CGFloat(sharedDefaults.double(forKey: Keys.lineNumberFontSize))
-        if self.lineNumberFontSize == 0 {
-            self.lineNumberFontSize = Defaults.lineNumberFontSize
-        } else {
-            // Keep the loaded value
-        }
+        let loadedLineNumberFontSize = CGFloat(sharedDefaults.double(forKey: Keys.lineNumberFontSize))
+        self.lineNumberFontSize = loadedLineNumberFontSize > 0 ? loadedLineNumberFontSize : Defaults.lineNumberFontSize
         self.lineNumberTextColor = sharedDefaults.string(forKey: Keys.lineNumberTextColor) ?? Defaults.lineNumberTextColor
         self.lineNumberBackgroundColor = sharedDefaults.string(forKey: Keys.lineNumberBackgroundColor) ?? Defaults.lineNumberBackgroundColor
         
         // Load content font settings
         self.contentFontName = sharedDefaults.string(forKey: Keys.contentFontName) ?? Defaults.contentFontName
-        self.contentFontSize = CGFloat(sharedDefaults.double(forKey: Keys.contentFontSize))
-        if self.contentFontSize == 0 {
-            self.contentFontSize = Defaults.contentFontSize
-        } else {
-            // Keep the loaded value
-        }
+        let loadedContentFontSize = CGFloat(sharedDefaults.double(forKey: Keys.contentFontSize))
+        self.contentFontSize = loadedContentFontSize > 0 ? loadedContentFontSize : Defaults.contentFontSize
         self.contentTextColor = sharedDefaults.string(forKey: Keys.contentTextColor) ?? Defaults.contentTextColor
         self.contentBackgroundColor = sharedDefaults.string(forKey: Keys.contentBackgroundColor) ?? Defaults.contentBackgroundColor
         

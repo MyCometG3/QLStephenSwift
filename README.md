@@ -25,6 +25,9 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
   - Western encodings (Windows-1252, MacRoman)
 - ✅ Intelligent encoding detection with priority-based fallback
 - ✅ Configurable maximum file size limit
+- ✅ **Line number display** with customizable separator
+- ✅ **RTF rendering** with custom fonts, colors, and tab width
+- ✅ Line-by-line text selection in RTF mode
 - ✅ macOS 15+ compatible (no external process dependencies)
 - ✅ Excludes binary files and `.DS_Store`
 
@@ -65,6 +68,8 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 
 ## Configuration
 
+Settings can be configured through the QLStephenSwift application UI or via command-line `defaults` commands.
+
 ### Maximum File Size
 
 Configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
@@ -74,6 +79,61 @@ defaults write com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
 ```
 
 Valid range: 102400-10485760 bytes (100KB-10MB)
+
+### Line Numbers
+
+Enable line numbers in text previews:
+
+```bash
+# Enable line numbers
+defaults write group.com.mycometg3.qlstephenswift lineNumbersEnabled -bool true
+
+# Configure line separator (default: " | ")
+defaults write group.com.mycometg3.qlstephenswift lineSeparator " | "
+```
+
+Line numbers are displayed with zero-padding and a minimum of 4 digits (e.g., 0001, 0002).
+
+### RTF Rendering
+
+Enable Rich Text Format rendering for enhanced formatting:
+
+```bash
+# Enable RTF rendering
+defaults write group.com.mycometg3.qlstephenswift rtfRenderingEnabled -bool true
+```
+
+#### Font Customization
+
+Configure fonts for line numbers and content:
+
+```bash
+# Line number font settings
+defaults write group.com.mycometg3.qlstephenswift lineNumberFontName "Menlo"
+defaults write group.com.mycometg3.qlstephenswift lineNumberFontSize -float 11.0
+defaults write group.com.mycometg3.qlstephenswift lineNumberTextColor "#888888"
+defaults write group.com.mycometg3.qlstephenswift lineNumberBackgroundColor "#F0F0F0"
+
+# Content font settings
+defaults write group.com.mycometg3.qlstephenswift contentFontName "Menlo"
+defaults write group.com.mycometg3.qlstephenswift contentFontSize -float 11.0
+defaults write group.com.mycometg3.qlstephenswift contentTextColor "#000000"
+defaults write group.com.mycometg3.qlstephenswift contentBackgroundColor "#FFFFFF"
+```
+
+Color values are in hex format (e.g., "#FF0000" for red).
+
+#### Tab Width Configuration
+
+Configure tab width in characters or points:
+
+```bash
+# Set tab width mode ("characters" or "points")
+defaults write group.com.mycometg3.qlstephenswift tabWidthMode "characters"
+
+# Set tab width value (e.g., 4 characters or 32 points)
+defaults write group.com.mycometg3.qlstephenswift tabWidthValue -float 4.0
+```
 
 ### Migration from Original QLStephen
 
