@@ -111,7 +111,9 @@ default: return separator  // Pass through
 
 1. **Character-based**: Tab = N characters wide
    ```swift
-   let characterWidth = font.advancement(forGlyph: font.glyph(withName: "m")).width
+   let mString = "m" as NSString
+   let size = mString.size(withAttributes: [.font: font])
+   let characterWidth = size.width
    tabWidth = characterWidth * settings.tabWidth.value
    ```
 
