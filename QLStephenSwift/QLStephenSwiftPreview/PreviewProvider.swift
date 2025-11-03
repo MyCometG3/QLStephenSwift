@@ -37,6 +37,32 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             throw PreviewError.cannotReadFile
         }
         
+        // Load formatting settings
+        let settings = TextFormattingSettings.load()
+        
+        // Check if we should use RTF rendering
+        if settings.rtfRenderingEnabled {
+            return try provideRTFPreview(fileURL: fileURL, 
+                                        encoding: analysisResult.encoding,
+                                        fileSize: fileSize,
+                                        maxFileSize: maxFileSize,
+                                        settings: settings)
+        } else {
+            // Use original plain text rendering
+            return try providePlainTextPreview(fileURL: fileURL,
+                                              encoding: analysisResult.encoding,
+                                              fileSize: fileSize,
+                                              maxFileSize: maxFileSize,
+                                              settings: settings)
+        }
+    }
+    
+    /// Provides plain text preview (original behavior, optionally with line numbers)
+    private func providePlainTextPreview(fileURL: URL,
+                                        encoding: String.Encoding,
+                                        fileSize: Int,
+                                        maxFileSize: Int,
+                                        settings: TextFormattingSettings) throws -> QLPreviewReply {
         let contentType = UTType.plainText
         
         let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
@@ -58,11 +84,109 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
                 data = fileData
             }
             
-            reply.stringEncoding = analysisResult.encoding
+            // If line numbers are enabled but RTF is not, add line numbers to plain text
+            if settings.lineNumbersEnabled {
+                if let text = String(data: data, encoding: encoding) {
+                    let numberedText = self.addLineNumbersToPlainText(text: text, 
+                                                                      separator: settings.lineSeparator)
+                    if let numberedData = numberedText.data(using: encoding) {
+                        data = numberedData
+                    }
+                }
+            }
+            
+            reply.stringEncoding = encoding
             return data
         }
         
         return reply
+    }
+    
+    /// Provides RTF preview with attributed strings
+    private func provideRTFPreview(fileURL: URL,
+                                   encoding: String.Encoding,
+                                   fileSize: Int,
+                                   maxFileSize: Int,
+                                   settings: TextFormattingSettings) throws -> QLPreviewReply {
+        let contentType = UTType.rtf
+        
+        let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
+            var data: Data
+            
+            if fileSize > maxFileSize {
+                // Read only up to maxFileSize
+                guard let fileHandle = try? FileHandle(forReadingFrom: fileURL),
+                      let limitedData = try? fileHandle.read(upToCount: maxFileSize) else {
+                    return Data()
+                }
+                try? fileHandle.close()
+                data = limitedData
+            } else {
+                // Read entire file
+                guard let fileData = try? Data(contentsOf: fileURL) else {
+                    return Data()
+                }
+                data = fileData
+            }
+            
+            // Convert data to string using detected encoding
+            guard let text = String(data: data, encoding: encoding) else {
+                return Data()
+            }
+            
+            // Render as attributed string
+            let attributedString = AttributedTextRenderer.render(text: text, settings: settings)
+            
+            // Convert to RTF data
+            let range = NSRange(location: 0, length: attributedString.length)
+            guard let rtfData = try? attributedString.data(from: range,
+                                                          documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf]) else {
+                return Data()
+            }
+            
+            return rtfData
+        }
+        
+        return reply
+    }
+    
+    /// Adds line numbers to plain text (when RTF is disabled)
+    private func addLineNumbersToPlainText(text: String, separator: String) -> String {
+        let lines = text.components(separatedBy: .newlines)
+        let lineCount = lines.count
+        let digitCount = max(4, String(lineCount).count)
+        
+        let resolvedSeparator = resolveSeparator(separator)
+        
+        var result = ""
+        for (index, line) in lines.enumerated() {
+            let lineNumber = index + 1
+            let lineNumberString = String(format: "%0*d", digitCount, lineNumber)
+            result += lineNumberString + resolvedSeparator + line
+            
+            // Add newline if not the last line, or if original text ended with newline
+            if index < lines.count - 1 || text.hasSuffix("\n") {
+                result += "\n"
+            }
+        }
+        
+        return result
+    }
+    
+    /// Resolves separator string from setting
+    private func resolveSeparator(_ separator: String) -> String {
+        switch separator.lowercased() {
+        case "space", " ":
+            return " "
+        case "tab", "\\t", "\t":
+            return "\t"
+        case ":", "colon":
+            return ":"
+        case "|", "pipe":
+            return "|"
+        default:
+            return separator
+        }
     }
     
     /// Retrieves the maximum file size setting from shared storage

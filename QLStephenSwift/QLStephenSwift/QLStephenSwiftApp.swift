@@ -32,9 +32,9 @@ struct QLStephenSwiftApp: App {
     var body: some Scene {
         Window("QLStephenSwift", id: "main") {
             ContentView()
-                .frame(width: 460, height: 420)
+                .frame(minWidth: 500, minHeight: 600)
         }
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(replacing: .newItem) { }
         }
