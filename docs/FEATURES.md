@@ -1,6 +1,6 @@
 # Line Numbers and RTF Rendering Features
 
-This document describes the new line number display and RTF rendering features added to QLStephenSwift.
+This document describes the line number display and RTF rendering features in QLStephenSwift.
 
 ## Feature A: Line Number Display
 
@@ -42,6 +42,9 @@ With separator "colon":
 0002:Second line of text
 0003:Third line of text
 ```
+
+### Line Ending Preservation
+The original line ending style (LF, CR, or CRLF) is automatically detected and preserved in the output. This ensures that files with different line ending styles maintain their original format when line numbers are added.
 
 ### Backward Compatibility
 When line numbers are disabled, the preview displays exactly as before with no changes to the output.
@@ -201,10 +204,17 @@ exit 0
 - Detected encoding is used to decode text before formatting
 - RTF output is always UTF-8 encoded
 
+### Line Ending Handling
+- Line endings are automatically detected (LF `\n`, CR `\r`, or CRLF `\r\n`)
+- Original line ending style is preserved in formatted output
+- Single-line files default to LF
+- Trailing newlines are preserved when present in the original file
+
 ### Performance
 - Text formatting happens during preview generation
 - For files > max file size, only the truncated portion is formatted
 - Line number calculation is O(n) where n = number of lines
+- Line ending detection uses single-pass iteration for efficiency
 
 ### Limitations
 - Advanced font settings require `defaults` command (not in UI)
@@ -233,6 +243,7 @@ To test the features:
    - Configuration files
    - Files with tabs
    - Files with various encodings (UTF-8, UTF-16, Shift-JIS, etc.)
+   - Files with different line endings (LF, CRLF, CR)
 
 4. **Test copy/paste**:
    - Select text in preview
@@ -260,3 +271,8 @@ To test the features:
 - Verify `tabWidthMode` is set correctly ("characters" or "points")
 - Adjust `tabWidthValue` as needed
 - Restart QuickLook after changing defaults
+
+**Line endings changed**:
+- The formatter automatically preserves the original line ending style
+- LF, CR, and CRLF are all supported and maintained
+- If you need a specific line ending, convert the file before previewing
