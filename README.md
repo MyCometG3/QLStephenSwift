@@ -68,15 +68,17 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 
 ## Configuration
 
-### Maximum File Size
+### Maximum Text File Size
 
-Configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
+Configure the maximum text file size for preview (default: 100KB, range: 100KB-10MB):
 
 ```bash
 defaults write group.com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
 ```
 
 Valid range: 102400-10485760 bytes (100KB-10MB)
+
+This setting controls preview truncation for text files only. See [File Size Limits](#file-size-limits) for details on how this interacts with binary detection.
 
 ### Line Numbers and RTF Rendering
 
@@ -117,6 +119,27 @@ Adaptive reading strategy based on file size:
 Binary classification rules (applied to sampled data):
 - **Immediate rejection**: Any null byte (0x00) → classified as binary
 - **Statistical analysis**: Control characters (excluding TAB/LF/CR/FF) > 30% → classified as binary
+
+### File Size Limits
+
+The preview system uses two independent size limits that serve different purposes:
+
+**Binary Detection (Analysis Phase)**
+- Files ≤5MB: Entire file loaded for accurate encoding detection
+- Files >5MB: First 8KB sampled to minimize memory usage
+- This is a hardcoded limit in `FileAnalyzer.swift` for the analysis phase
+
+**Preview Display (Rendering Phase)**
+- Controlled by "Max Text File Size" setting in app UI (default: 100KB, max: 10MB)
+- Text files exceeding this limit are truncated in preview
+- Does not affect binary detection—truncation occurs after text validation
+- Configurable via UI or `defaults write` command
+
+These limits are sequential and independent:
+1. First, binary detection runs (using 5MB threshold for sampling strategy)
+2. If file passes as text, preview truncation applies (using user-configured limit)
+
+This means setting "Max Text File Size" above 5MB is valid—binary detection will still use sampling for files >5MB, but the full text content (up to the configured limit) will be displayed in preview.
 
 ### Line Ending Handling
 
@@ -170,6 +193,32 @@ QLStephenSwift modernizes the approach:
 2. Reset QuickLook: `qlmanage -r && qlmanage -r cache`
 3. Restart Finder: `killall Finder`
 4. Check which extension handles files: `qlmanage -m | grep public.data`
+
+### Verifying App Extension Installation
+
+QLStephenSwift uses the modern App Extension architecture (`.appex`), not legacy Quick Look Generators (`.qlgenerator`). To verify and manage the extension, use the `pluginkit` command:
+
+**List all Quick Look Preview extensions:**
+```bash
+pluginkit -m -p com.apple.quicklook.preview
+```
+
+**Find QLStephenSwift extension specifically:**
+```bash
+pluginkit -m -i com.mycometg3.qlstephenswift.qlstephenswiftpreview
+```
+
+Alternatively, filter by protocol:
+```bash
+pluginkit -m -p com.apple.quicklook.preview | grep -i qlstephen
+```
+
+**Force re-register the extension (if not appearing):**
+```bash
+pluginkit -a /Applications/QLStephenSwift.app/Contents/PlugIns/QLStephenSwiftPreview.appex
+```
+
+**Note:** The `qlmanage` command is useful for testing previews and clearing caches, but `pluginkit` is the proper tool for managing App Extension-based Quick Look plugins. Legacy `.qlgenerator` plugins are deprecated in modern macOS versions.
 
 ## Contributing
 

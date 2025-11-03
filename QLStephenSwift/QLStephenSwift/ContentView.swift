@@ -45,7 +45,7 @@ struct ContentView: View {
                         .font(.headline)
                     
                     HStack {
-                        Text("Max File Size:")
+                        Text("Max Text File Size:")
                             .frame(width: 140, alignment: .trailing)
                         
                         TextField("100", text: $maxFileSizeKBText)
@@ -60,7 +60,7 @@ struct ContentView: View {
                         Spacer()
                     }
                     
-                    Text("Files larger than this will be truncated. (Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB)")
+                    Text("Text files larger than this limit will be truncated in preview. (Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.leading, 120)
