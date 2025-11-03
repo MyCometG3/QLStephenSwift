@@ -127,7 +127,7 @@ struct ContentView: View {
                             .font(.headline)
                         Image(systemName: "info.circle")
                             .foregroundColor(.secondary)
-                            .help("RTF mode applies font styles and colors. Requires line numbers to be enabled")
+                            .help("RTF mode applies font styles and colors. Can be used independently or together with line numbers")
                     }
                     
                     HStack {
