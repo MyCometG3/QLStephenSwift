@@ -313,13 +313,20 @@ struct ContentView: View {
         
         // Load font settings with proper fallback chain
         let storedFontName = sharedDefaults.string(forKey: AppConstants.RTF.contentFontNameKey) ?? AppConstants.RTF.defaultContentFontName
-        // Validate that stored font is available, fallback to default, then first available
+        // Validate that stored font is available, fallback to default, then first available, then system font
         if availableFonts.contains(storedFontName) {
             contentFontName = storedFontName
         } else if availableFonts.contains(AppConstants.RTF.defaultContentFontName) {
             contentFontName = AppConstants.RTF.defaultContentFontName
+        } else if let firstAvailable = availableFonts.first {
+            contentFontName = firstAvailable
+            print("⚠️ Warning: Default font '\(AppConstants.RTF.defaultContentFontName)' not available, using '\(firstAvailable)'")
         } else {
-            contentFontName = availableFonts.first ?? AppConstants.RTF.defaultContentFontName
+            // Extreme edge case: no monospaced fonts detected
+            // Use system monospaced font as guaranteed fallback
+            let systemFont = NSFont.monospacedSystemFont(ofSize: AppConstants.RTF.defaultContentFontSize, weight: .regular)
+            contentFontName = systemFont.fontName
+            print("⚠️ Warning: No monospaced fonts detected, using system monospaced font: '\(systemFont.fontName)'")
         }
         let fontSizeValue = sharedDefaults.double(forKey: AppConstants.RTF.contentFontSizeKey)
         contentFontSize = fontSizeValue != 0 ? CGFloat(fontSizeValue) : AppConstants.RTF.defaultContentFontSize
