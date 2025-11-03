@@ -126,9 +126,13 @@ struct TextFormatter {
         
         var result = numberedLines.joined(separator: "\n")
         
-        // Add trailing newline if original text had one
-        if text.hasSuffix("\n") {
+        // Add trailing newline if original text had one (\n, \r, or \r\n)
+        if text.hasSuffix("\r\n") {
+            result.append("\r\n")
+        } else if text.hasSuffix("\n") {
             result.append("\n")
+        } else if text.hasSuffix("\r") {
+            result.append("\r")
         }
         
         return result
