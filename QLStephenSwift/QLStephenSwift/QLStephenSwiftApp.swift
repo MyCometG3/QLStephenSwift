@@ -32,7 +32,7 @@ struct QLStephenSwiftApp: App {
     var body: some Scene {
         Window("QLStephenSwift", id: "main") {
             ContentView()
-                .frame(width: 520, height: 580)
+                .frame(width: 500, height: 660)
         }
         .windowResizability(.contentSize)
         .commands {

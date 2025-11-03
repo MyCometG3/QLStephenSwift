@@ -46,7 +46,7 @@ struct ContentView: View {
                     
                     HStack {
                         Text("Max File Size:")
-                            .frame(width: 120, alignment: .trailing)
+                            .frame(width: 140, alignment: .trailing)
                         
                         TextField("100", text: $maxFileSizeKBText)
                             .textFieldStyle(.roundedBorder)
@@ -60,19 +60,12 @@ struct ContentView: View {
                         Spacer()
                     }
                     
-                    Text("Files larger than this will be truncated")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.leading, 120)
-                    
-                    Text("Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB")
+                    Text("Files larger than this will be truncated. (Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.leading, 120)
                 }
                 .padding(.horizontal)
-                
-                Divider()
                 
                 // Line Numbers Settings
                 VStack(alignment: .leading, spacing: 12) {
@@ -116,8 +109,6 @@ struct ContentView: View {
                 }
                 .padding(.horizontal)
                 
-                Divider()
-                
                 // RTF Rendering Settings
                 VStack(alignment: .leading, spacing: 12) {
                     Text("RTF Rendering")
@@ -136,12 +127,7 @@ struct ContentView: View {
                         Spacer()
                     }
                     
-                    Text("RTF mode applies font styles and colors")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.leading, 140)
-                    
-                    Text("Advanced font settings can be configured via defaults")
+                    Text("RTF mode applies font styles and colors. Advanced font settings can be configured via defaults")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.leading, 140)
@@ -157,7 +143,7 @@ struct ContentView: View {
                     
                     HStack {
                         Text("Swift Version:")
-                            .frame(width: 120, alignment: .trailing)
+                            .frame(width: 140, alignment: .trailing)
                         Link("github.com/MyCometG3/QLStephenSwift",
                              destination: URL(string: "https://github.com/MyCometG3/QLStephenSwift")!)
                         Spacer()
@@ -165,7 +151,7 @@ struct ContentView: View {
                     
                     HStack {
                         Text("Original:")
-                            .frame(width: 120, alignment: .trailing)
+                            .frame(width: 140, alignment: .trailing)
                         Link("github.com/whomwah/qlstephen",
                              destination: URL(string: "https://github.com/whomwah/qlstephen")!)
                         Spacer()
