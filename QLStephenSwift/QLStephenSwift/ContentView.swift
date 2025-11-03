@@ -22,6 +22,7 @@ struct ContentView: View {
     // Font customization settings
     @State private var contentFontName: String = AppConstants.RTF.defaultContentFontName
     @State private var contentFontSize: CGFloat = AppConstants.RTF.defaultContentFontSize
+    @State private var availableFonts: [String] = []
     
     // Color customization settings
     @State private var contentForegroundColor: Color = Color.black
@@ -144,15 +145,20 @@ struct ContentView: View {
                 // Font Customization Settings
                 if rtfRenderingEnabled {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Font Settings")
-                            .font(.headline)
+                        HStack {
+                            Text("Font Settings")
+                                .font(.headline)
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.secondary)
+                                .help("Monospaced fonts are listed by PostScript name (e.g., 'Osaka-Mono') to ensure fixed-pitch variants are used")
+                        }
                         
                         HStack {
                             Text("Font Family:")
                                 .frame(width: 140, alignment: .trailing)
                             
                             Picker("", selection: $contentFontName) {
-                                ForEach(AppConstants.RTF.availableFonts, id: \.self) { font in
+                                ForEach(availableFonts, id: \.self) { font in
                                     Text(font).tag(font)
                                 }
                             }
@@ -282,6 +288,9 @@ struct ContentView: View {
             return
         }
         
+        // Load available monospaced fonts from system
+        availableFonts = AppConstants.RTF.getAvailableMonospacedFonts()
+        
         // Migrate old keys FIRST if present and not already migrated
         // This ensures correct priority: legacy settings are only used if no App Group setting exists
         migrateOldSettingsIfNeeded(to: sharedDefaults)
@@ -303,7 +312,9 @@ struct ContentView: View {
         rtfRenderingEnabled = sharedDefaults.bool(forKey: AppConstants.RTF.enabledKey)
         
         // Load font settings
-        contentFontName = sharedDefaults.string(forKey: AppConstants.RTF.contentFontNameKey) ?? AppConstants.RTF.defaultContentFontName
+        let storedFontName = sharedDefaults.string(forKey: AppConstants.RTF.contentFontNameKey) ?? AppConstants.RTF.defaultContentFontName
+        // Validate that stored font is available, fallback to default if not
+        contentFontName = availableFonts.contains(storedFontName) ? storedFontName : AppConstants.RTF.defaultContentFontName
         let fontSizeValue = sharedDefaults.double(forKey: AppConstants.RTF.contentFontSizeKey)
         contentFontSize = fontSizeValue != 0 ? CGFloat(fontSizeValue) : AppConstants.RTF.defaultContentFontSize
         

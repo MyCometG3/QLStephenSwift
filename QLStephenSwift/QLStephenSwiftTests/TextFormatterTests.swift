@@ -158,11 +158,15 @@ final class TextFormatterTests: XCTestCase {
     
     /// Test new font customization constants
     func testFontCustomizationConstants() throws {
-        // Test available fonts list
-        let availableFonts = ["Menlo", "Monaco", "SF Mono", "Courier New", "Courier"]
-        XCTAssertEqual(availableFonts.count, 5)
-        XCTAssertTrue(availableFonts.contains("Menlo"))
-        XCTAssertTrue(availableFonts.contains("Monaco"))
+        // Test available fonts retrieval from system
+        let availableFonts = AppConstants.RTF.getAvailableMonospacedFonts()
+        XCTAssertGreaterThan(availableFonts.count, 0, "Should find at least some monospaced fonts")
+        
+        // Common monospaced fonts that should be available on macOS
+        // Note: We don't assert all exist as font availability may vary by system
+        let commonMonospacedFonts = ["Menlo", "Monaco", "Courier"]
+        let foundCommonFonts = commonMonospacedFonts.filter { availableFonts.contains($0) }
+        XCTAssertGreaterThan(foundCommonFonts.count, 0, "Should find at least one common monospaced font")
         
         // Test font size range
         let minFontSize: CGFloat = 8.0
