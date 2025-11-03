@@ -51,8 +51,13 @@ struct ContentView: View {
                 
                 // General Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("General Settings")
-                        .font(.headline)
+                    HStack {
+                        Text("General Settings")
+                            .font(.headline)
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.secondary)
+                            .help("Text files larger than this limit will be truncated in preview. (Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB)")
+                    }
                     
                     HStack {
                         Text("Max Text File Size:")
@@ -69,18 +74,18 @@ struct ContentView: View {
                         
                         Spacer()
                     }
-                    
-                    Text("Text files larger than this limit will be truncated in preview. (Range: \(AppConstants.FileSize.minKB) - \(AppConstants.FileSize.maxKB) KB)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.leading, 120)
                 }
                 .padding(.horizontal)
                 
                 // Line Numbers Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Line Numbers")
-                        .font(.headline)
+                    HStack {
+                        Text("Line Numbers")
+                            .font(.headline)
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.secondary)
+                            .help("Line numbers use minimum 4 digits with zero padding")
+                    }
                     
                     HStack {
                         Text("Show Line Numbers:")
@@ -111,18 +116,18 @@ struct ContentView: View {
                         
                         Spacer()
                     }
-                    
-                    Text("Line numbers use minimum 4 digits with zero padding")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.leading, 140)
                 }
                 .padding(.horizontal)
                 
                 // RTF Rendering Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("RTF Rendering")
-                        .font(.headline)
+                    HStack {
+                        Text("RTF Rendering")
+                            .font(.headline)
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.secondary)
+                            .help("RTF mode applies font styles and colors. Requires line numbers to be enabled")
+                    }
                     
                     HStack {
                         Text("Enable RTF Output:")
@@ -137,11 +142,6 @@ struct ContentView: View {
                         
                         Spacer()
                     }
-                    
-                    Text("RTF mode applies font styles and colors. Requires line numbers to be enabled")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.leading, 140)
                 }
                 .padding(.horizontal)
                 
@@ -188,26 +188,28 @@ struct ContentView: View {
                     
                     // Color Customization Settings
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Color Settings (Light Mode)")
-                            .font(.headline)
+                        HStack {
+                            Text("Colors")
+                                .font(.headline)
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.secondary)
+                                .help("Colors automatically adapt based on system appearance")
+                        }
                         
                         HStack {
-                            Text("Text Color:")
+                            Text("Light Mode:")
                                 .frame(width: 140, alignment: .trailing)
                             
+                            Text("Text")
+                                .frame(width: 50, alignment: .trailing)
                             ColorPicker("", selection: $contentForegroundColor, supportsOpacity: false)
                                 .labelsHidden()
                                 .onChange(of: contentForegroundColor) { _, newValue in
                                     saveContentColors()
                                 }
                             
-                            Spacer()
-                        }
-                        
-                        HStack {
-                            Text("Background Color:")
-                                .frame(width: 140, alignment: .trailing)
-                            
+                            Text("Background")
+                                .frame(width: 80, alignment: .trailing)
                             ColorPicker("", selection: $contentBackgroundColor, supportsOpacity: false)
                                 .labelsHidden()
                                 .onChange(of: contentBackgroundColor) { _, newValue in
@@ -216,30 +218,21 @@ struct ContentView: View {
                             
                             Spacer()
                         }
-                    }
-                    .padding(.horizontal)
-                    
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Color Settings (Dark Mode)")
-                            .font(.headline)
                         
                         HStack {
-                            Text("Text Color:")
+                            Text("Dark Mode:")
                                 .frame(width: 140, alignment: .trailing)
                             
+                            Text("Text")
+                                .frame(width: 50, alignment: .trailing)
                             ColorPicker("", selection: $contentForegroundColorDark, supportsOpacity: false)
                                 .labelsHidden()
                                 .onChange(of: contentForegroundColorDark) { _, newValue in
                                     saveContentColors()
                                 }
                             
-                            Spacer()
-                        }
-                        
-                        HStack {
-                            Text("Background Color:")
-                                .frame(width: 140, alignment: .trailing)
-                            
+                            Text("Background")
+                                .frame(width: 80, alignment: .trailing)
                             ColorPicker("", selection: $contentBackgroundColorDark, supportsOpacity: false)
                                 .labelsHidden()
                                 .onChange(of: contentBackgroundColorDark) { _, newValue in
@@ -248,11 +241,6 @@ struct ContentView: View {
                             
                             Spacer()
                         }
-                        
-                        Text("Colors automatically adapt based on system appearance")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.leading, 140)
                     }
                     .padding(.horizontal)
                 }
