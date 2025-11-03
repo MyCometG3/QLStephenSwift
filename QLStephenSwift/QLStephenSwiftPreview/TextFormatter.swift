@@ -296,7 +296,6 @@ struct TextFormatter {
         return result
     }
     
-    /// Convert hex color string to NSColor
     /// Convert hex string to NSColor
     /// Delegates to shared ColorUtilities to avoid code duplication
     private static func colorFromHex(_ hex: String) -> NSColor? {
