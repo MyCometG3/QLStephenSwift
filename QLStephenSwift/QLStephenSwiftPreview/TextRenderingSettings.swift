@@ -13,7 +13,7 @@ import AppKit
 /// All settings are persisted in App Group shared UserDefaults
 struct TextRenderingSettings {
     // MARK: - UserDefaults Keys
-    private enum Keys {
+    enum Keys {
         static let lineNumbersEnabled = "lineNumbersEnabled"
         static let lineSeparator = "lineSeparator"
         static let rtfRenderingEnabled = "rtfRenderingEnabled"

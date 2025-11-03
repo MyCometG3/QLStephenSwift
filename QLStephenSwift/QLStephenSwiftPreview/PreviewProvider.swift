@@ -99,8 +99,6 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         return reply
     }
     
-
-    
     /// Retrieves the maximum file size setting from shared storage
     /// 
     /// Priority order:
