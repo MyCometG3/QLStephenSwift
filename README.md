@@ -177,12 +177,17 @@ QLStephenSwift uses the modern App Extension architecture (`.appex`), not legacy
 
 **List all Quick Look Preview extensions:**
 ```bash
-pluginkit -m -v -i com.apple.quicklook.preview
+pluginkit -m -p com.apple.quicklook.preview
 ```
 
 **Find QLStephenSwift extension specifically:**
 ```bash
-pluginkit -m -v -i com.apple.quicklook.preview | grep -i qlstephen
+pluginkit -m -i com.mycometg3.qlstephenswift.qlstephenswiftpreview
+```
+
+Alternatively, filter by protocol:
+```bash
+pluginkit -m -p com.apple.quicklook.preview | grep -i qlstephen
 ```
 
 **Force re-register the extension (if not appearing):**
