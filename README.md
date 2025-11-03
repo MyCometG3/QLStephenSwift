@@ -25,6 +25,9 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
   - Western encodings (Windows-1252, MacRoman)
 - ✅ Intelligent encoding detection with priority-based fallback
 - ✅ Configurable maximum file size limit
+- ✅ **NEW:** Line number display with customizable separators
+- ✅ **NEW:** RTF rendering with custom font attributes and colors
+- ✅ **NEW:** Configurable tab width (characters or points)
 - ✅ macOS 15+ compatible (no external process dependencies)
 - ✅ Excludes binary files and `.DS_Store`
 
@@ -65,12 +68,66 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 
 ## Configuration
 
-### Maximum File Size
+### Basic Settings (via App UI)
 
-Configure the maximum file size for preview (default: 100KB, range: 100KB-10MB):
+Launch the QLStephenSwift application to access the settings UI:
+
+1. **Maximum File Size**: Configure the maximum file size for preview (default: 100KB, range: 100KB-10MB)
+2. **Line Numbers**: Enable/disable line number display and choose separator style (space, colon, pipe, tab)
+3. **RTF Rendering**: Enable rich text formatting with custom fonts and colors
+
+### Line Number Display
+
+Enable line numbers in the QuickLook preview:
 
 ```bash
-defaults write com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
+# Enable line numbers
+defaults write group.com.mycometg3.qlstephenswift lineNumbersEnabled -bool true
+
+# Set line separator (options: " ", ":", "|", "\t")
+defaults write group.com.mycometg3.qlstephenswift lineSeparator -string ":"
+```
+
+Line numbers are displayed with:
+- Minimum 4 digits with zero-padding (e.g., 0001, 0002, ...)
+- Automatic digit expansion for files with more than 9999 lines
+- Customizable separator between line number and content
+
+### RTF Rendering
+
+Enable RTF rendering for rich text formatting:
+
+```bash
+# Enable RTF rendering
+defaults write group.com.mycometg3.qlstephenswift rtfRenderingEnabled -bool true
+```
+
+#### Advanced Font Customization
+
+Customize font attributes via command line (all settings are optional):
+
+```bash
+# Line number font settings
+defaults write group.com.mycometg3.qlstephenswift lineNumberFontName -string "Monaco"
+defaults write group.com.mycometg3.qlstephenswift lineNumberFontSize -float 10.0
+
+# Content font settings
+defaults write group.com.mycometg3.qlstephenswift contentFontName -string "Menlo"
+defaults write group.com.mycometg3.qlstephenswift contentFontSize -float 11.0
+
+# Tab width settings
+defaults write group.com.mycometg3.qlstephenswift tabWidthMode -string "characters"  # or "points"
+defaults write group.com.mycometg3.qlstephenswift tabWidthValue -float 4.0
+```
+
+**Note**: Font colors and background colors are saved as archived NSColor data. For custom colors, use the defaults system with archived data format.
+
+### Maximum File Size (Legacy)
+
+You can also configure file size via command line:
+
+```bash
+defaults write group.com.mycometg3.qlstephenswift maxFileSize 204800  # 200KB
 ```
 
 Valid range: 102400-10485760 bytes (100KB-10MB)
