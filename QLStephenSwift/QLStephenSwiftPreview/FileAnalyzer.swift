@@ -21,16 +21,18 @@ struct FileAnalyzer {
     
     // Default encoding suggestion array for ICU detection
     // Can be customized via the suggestedEncodings parameter in detection methods
-    // ICU performs statistical analysis; we only suggest UTF-8 to guide its heuristics
-    // Other encodings are handled by strict validation or fallback mechanisms
-    private static let defaultSuggestedEncodings: [String.Encoding] = [
-        .utf8  // UTF-8 only - ICU is effective at detecting UTF-8 patterns
-    ]
+    // Empty array allows ICU to use its full statistical analysis without bias
+    // This enables detection of ISO-2022-JP and other encodings that may be
+    // incorrectly detected as UTF-8 when UTF-8 is suggested
+    private static let defaultSuggestedEncodings: [String.Encoding] = []
     
     // Default fallback encoding array
-    // These are tried in order if BOM, strict UTF-8, and ICU detection all fail
+    // These are tried in order if BOM, ISO-2022-JP, strict UTF-8, and ICU detection all fail
     // Ordered by: strictness > regional relevance > rarity
     // Priority: Japanese > Korean > Chinese > Western > UTF-16/32 without BOM (rare)
+    //
+    // Note: ISO-2022-JP is included here as a safety net, but it's typically detected
+    // earlier via escape sequence detection (Step 2) before reaching fallback
     //
     // Rationale for UTF-16/32 placement at end:
     // - UTF-16/32 without BOM are extremely rare in practice
@@ -38,7 +40,7 @@ struct FileAnalyzer {
     // - Statistical detection (ICU) is unreliable for BOM-less UTF-16
     // - Placing at end ensures other likely encodings are tried first
     private static let defaultFallbackEncodings: [String.Encoding] = [
-        .iso2022JP,                 // Japanese JIS - highly structured, low false positive rate
+        .iso2022JP,                 // Japanese JIS - safety net (normally caught by Step 2)
         .japaneseEUC,               // Japanese EUC-JP
         .shiftJIS,                  // Japanese Shift-JIS
         cfEncoding(.EUC_KR),        // Korean EUC-KR
@@ -166,9 +168,10 @@ struct FileAnalyzer {
                 // Immediate binary detection on null byte
                 return true
             } else if byte < 0x20 {
-                // Check for control characters (excluding common whitespace)
-                // Allow: TAB(0x09), LF(0x0A), CR(0x0D), FF(0x0C)
-                if byte != 0x09 && byte != 0x0A && byte != 0x0D && byte != 0x0C {
+                // Check for control characters (excluding common whitespace and escape sequences)
+                // Allow: TAB(0x09), LF(0x0A), CR(0x0D), FF(0x0C), ESC(0x1B)
+                // ESC(0x1B) is needed for ISO-2022-JP encoding
+                if byte != 0x09 && byte != 0x0A && byte != 0x0D && byte != 0x0C && byte != 0x1B {
                     suspiciousCount += 1
                 }
             }
@@ -194,7 +197,16 @@ struct FileAnalyzer {
             // (keeping BOM in case another encoding can decode it successfully)
         }
         
-        // 2. Strict UTF-8 validation (without BOM)
+        // 2. Check for ISO-2022-JP escape sequences
+        // ISO-2022-JP uses only ASCII bytes, so it would pass strict UTF-8 validation
+        // We must check for its escape sequences before UTF-8 validation
+        if hasISO2022JPEscapeSequences(data) {
+            if let text = String(data: data, encoding: .iso2022JP) {
+                return (.iso2022JP, text)
+            }
+        }
+        
+        // 3. Strict UTF-8 validation (without BOM)
         // Performed before ICU detection to ensure high-confidence UTF-8 detection
         // This prevents false positives from ICU's heuristic-based detection
         if isStrictUTF8(data) {
@@ -203,7 +215,7 @@ struct FileAnalyzer {
             }
         }
         
-        // 3. Use Foundation/ICU-based encoding detection
+        // 4. Use Foundation/ICU-based encoding detection
         // ICU uses statistical analysis and heuristics for encoding detection
         if let detected = detectEncodingWithICU(data, suggestedEncodings: suggested) {
             if let text = String(data: data, encoding: detected) {
@@ -211,7 +223,7 @@ struct FileAnalyzer {
             }
         }
         
-        // 4. Fallback with priority order
+        // 5. Fallback with priority order
         // Try encodings in order of strictness and regional relevance
         // UTF-16/32 without BOM are included at the end of fallback array
         // This eliminates the need for separate custom UTF-16 detection
@@ -221,7 +233,7 @@ struct FileAnalyzer {
             }
         }
         
-        // 5. Last resort: lossy UTF-8 using different initializer
+        // 6. Last resort: lossy UTF-8 using different initializer
         // Note: String(decoding:as:) performs lossy conversion, replacing invalid
         // UTF-8 sequences with replacement characters (U+FFFD). This ensures we
         // always return something, but may produce gibberish for truly binary data
@@ -229,6 +241,39 @@ struct FileAnalyzer {
         // binary heuristic has already passed, so the data is likely text-like.
         let text = String(decoding: data, as: UTF8.self)
         return (.utf8, text)
+    }
+    
+    /// Checks if data contains ISO-2022-JP escape sequences
+    /// ISO-2022-JP uses escape sequences to switch character sets:
+    /// - ESC $ B or ESC $ @ : Switch to JIS X 0208 (Kanji)
+    /// - ESC ( B : Switch back to ASCII
+    /// - ESC ( J : Switch to JIS X 0201 Roman
+    /// - ESC ( I : Switch to JIS X 0201 Katakana
+    /// - Parameter data: Data to check
+    /// - Returns: true if ISO-2022-JP escape sequences are detected
+    private static func hasISO2022JPEscapeSequences(_ data: Data) -> Bool {
+        let length = data.count
+        var i = 0
+        
+        while i < length - 2 {
+            if data[i] == 0x1B { // ESC character
+                let next = data[i + 1]
+                let third = data[i + 2]
+                
+                // Check for common ISO-2022-JP escape sequences
+                // ESC $ B or ESC $ @ (switch to Kanji)
+                if next == 0x24 && (third == 0x42 || third == 0x40) {
+                    return true
+                }
+                // ESC ( B, ESC ( J, ESC ( I (switch to ASCII/Roman/Katakana)
+                if next == 0x28 && (third == 0x42 || third == 0x4A || third == 0x49) {
+                    return true
+                }
+            }
+            i += 1
+        }
+        
+        return false
     }
     
     /// Performs strict UTF-8 validation without BOM

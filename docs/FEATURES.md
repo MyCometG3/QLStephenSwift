@@ -224,7 +224,12 @@ exit 0
 ## Technical Notes
 
 ### Encoding Detection
-- Text encoding is detected using the existing FileAnalyzer logic
+- Text encoding is detected using FileAnalyzer's multi-stage detection:
+  1. BOM detection (UTF-8/16/32)
+  2. ISO-2022-JP escape sequence detection
+  3. Strict UTF-8 validation
+  4. ICU statistical analysis
+  5. Priority-based fallback (Japanese/Korean/Chinese/Western encodings)
 - Detected encoding is used to decode text before formatting
 - RTF output is always UTF-8 encoded
 
