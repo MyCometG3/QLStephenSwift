@@ -1,0 +1,3 @@
+#!/bin/bash
+# Test script file
+echo "Hello, World!"

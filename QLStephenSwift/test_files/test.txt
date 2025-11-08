@@ -1,0 +1,10 @@
+This is a test file for Quick Look preview debugging.
+
+NOTE: This file has .txt extension and is classified as public.plain-text UTI.
+According to macOS Quick Look precedence rules, system Quick Look generators
+take priority over third-party extensions for public.plain-text.
+Therefore, this file will be handled by the system's default text handler,
+NOT by QLStephenSwift extension.
+
+QLStephenSwift is designed for files WITHOUT extensions (like README, Makefile)
+which are classified as public.data or public.content.

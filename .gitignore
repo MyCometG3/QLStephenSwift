@@ -29,5 +29,5 @@ Pods/
 # Carthage
 Carthage/Build/
 
-# Test files
-test_files/
+# Test files - exclude only .DS_Store
+test_files/.DS_Store
