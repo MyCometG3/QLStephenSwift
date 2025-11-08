@@ -20,7 +20,9 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 - ✅ Automatic text/binary file detection
 - ✅ Comprehensive encoding support:
   - BOM detection (UTF-8, UTF-16, UTF-32 BE/LE)
+  - ISO-2022-JP escape sequence detection
   - Strict UTF-8 validation (RFC 3629 compliant)
+  - ICU statistical analysis for legacy encodings
   - CJK encodings (Japanese, Korean, Chinese)
   - Western encodings (Windows-1252, MacRoman)
 - ✅ Intelligent encoding detection with priority-based fallback
@@ -139,7 +141,8 @@ Adaptive reading strategy based on file size:
 
 Binary classification rules (applied to sampled data):
 - **Immediate rejection**: Any null byte (0x00) → classified as binary
-- **Statistical analysis**: Control characters (excluding TAB/LF/CR/FF) > 30% → classified as binary
+- **Statistical analysis**: Control characters (excluding TAB/LF/CR/FF/ESC) > 30% → classified as binary
+  - ESC (0x1B) is allowed for ISO-2022-JP escape sequences
 
 ### File Size Limits
 
@@ -178,22 +181,27 @@ Multi-stage detection with priority-based fallback to minimize false positives:
 1. **BOM Detection** (highest priority)
    - UTF-8, UTF-16 BE/LE, UTF-32 BE/LE
 
-2. **Strict UTF-8 Validation** (RFC 3629 compliant)
+2. **ISO-2022-JP Escape Sequence Detection**
+   - Detects ISO-2022-JP by checking for escape sequences (ESC $ B, ESC ( B, etc.)
+   - Must be checked before UTF-8 validation (ISO-2022-JP uses only ASCII bytes)
+
+3. **Strict UTF-8 Validation** (RFC 3629 compliant)
    - Validates byte sequence structure
    - Rejects overlong encodings and invalid code points
 
-3. **ICU Statistical Detection**
-   - Uses Foundation's `NSString.stringEncoding(for:)` with UTF-8-only suggestion
-   - Provides additional heuristic-based detection as safety net
+4. **ICU Statistical Detection**
+   - Uses Foundation's `NSString.stringEncoding(for:)` with no encoding suggestions
+   - Empty suggestions allow ICU to use full statistical analysis without bias
+   - Provides heuristic-based detection for legacy encodings
 
-4. **Priority-based Fallback** (in order of strictness and regional relevance)
-   - Japanese: ISO-2022-JP, EUC-JP, Shift-JIS
+5. **Priority-based Fallback** (in order of strictness and regional relevance)
+   - Japanese: ISO-2022-JP (safety net), EUC-JP, Shift-JIS
    - Korean: EUC-KR
    - Chinese: GB18030, Big5, GB2312
    - Western: Windows-1252, MacRoman
    - UTF-16/32 BE/LE without BOM (rare, last resort)
 
-5. **Lossy UTF-8** (final fallback)
+6. **Lossy UTF-8** (final fallback)
    - Replaces invalid sequences with U+FFFD replacement characters
 
 ## Why QLStephenSwift?

@@ -27,9 +27,12 @@ struct FileAnalyzer {
     private static let defaultSuggestedEncodings: [String.Encoding] = []
     
     // Default fallback encoding array
-    // These are tried in order if BOM, strict UTF-8, and ICU detection all fail
+    // These are tried in order if BOM, ISO-2022-JP, strict UTF-8, and ICU detection all fail
     // Ordered by: strictness > regional relevance > rarity
     // Priority: Japanese > Korean > Chinese > Western > UTF-16/32 without BOM (rare)
+    //
+    // Note: ISO-2022-JP is included here as a safety net, but it's typically detected
+    // earlier via escape sequence detection (Step 2) before reaching fallback
     //
     // Rationale for UTF-16/32 placement at end:
     // - UTF-16/32 without BOM are extremely rare in practice
@@ -37,7 +40,7 @@ struct FileAnalyzer {
     // - Statistical detection (ICU) is unreliable for BOM-less UTF-16
     // - Placing at end ensures other likely encodings are tried first
     private static let defaultFallbackEncodings: [String.Encoding] = [
-        .iso2022JP,                 // Japanese JIS - highly structured, low false positive rate
+        .iso2022JP,                 // Japanese JIS - safety net (normally caught by Step 2)
         .japaneseEUC,               // Japanese EUC-JP
         .shiftJIS,                  // Japanese Shift-JIS
         cfEncoding(.EUC_KR),        // Korean EUC-KR
