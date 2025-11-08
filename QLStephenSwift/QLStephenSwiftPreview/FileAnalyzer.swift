@@ -194,7 +194,16 @@ struct FileAnalyzer {
             // (keeping BOM in case another encoding can decode it successfully)
         }
         
-        // 2. Strict UTF-8 validation (without BOM)
+        // 2. Check for ISO-2022-JP escape sequences
+        // ISO-2022-JP uses only ASCII bytes, so it would pass strict UTF-8 validation
+        // We must check for its escape sequences before UTF-8 validation
+        if hasISO2022JPEscapeSequences(data) {
+            if let text = String(data: data, encoding: .iso2022JP) {
+                return (.iso2022JP, text)
+            }
+        }
+        
+        // 3. Strict UTF-8 validation (without BOM)
         // Performed before ICU detection to ensure high-confidence UTF-8 detection
         // This prevents false positives from ICU's heuristic-based detection
         if isStrictUTF8(data) {
@@ -203,7 +212,7 @@ struct FileAnalyzer {
             }
         }
         
-        // 3. Use Foundation/ICU-based encoding detection
+        // 4. Use Foundation/ICU-based encoding detection
         // ICU uses statistical analysis and heuristics for encoding detection
         if let detected = detectEncodingWithICU(data, suggestedEncodings: suggested) {
             if let text = String(data: data, encoding: detected) {
@@ -211,7 +220,7 @@ struct FileAnalyzer {
             }
         }
         
-        // 4. Fallback with priority order
+        // 5. Fallback with priority order
         // Try encodings in order of strictness and regional relevance
         // UTF-16/32 without BOM are included at the end of fallback array
         // This eliminates the need for separate custom UTF-16 detection
@@ -221,7 +230,7 @@ struct FileAnalyzer {
             }
         }
         
-        // 5. Last resort: lossy UTF-8 using different initializer
+        // 6. Last resort: lossy UTF-8 using different initializer
         // Note: String(decoding:as:) performs lossy conversion, replacing invalid
         // UTF-8 sequences with replacement characters (U+FFFD). This ensures we
         // always return something, but may produce gibberish for truly binary data
@@ -229,6 +238,39 @@ struct FileAnalyzer {
         // binary heuristic has already passed, so the data is likely text-like.
         let text = String(decoding: data, as: UTF8.self)
         return (.utf8, text)
+    }
+    
+    /// Checks if data contains ISO-2022-JP escape sequences
+    /// ISO-2022-JP uses escape sequences to switch character sets:
+    /// - ESC $ B or ESC $ @ : Switch to JIS X 0208 (Kanji)
+    /// - ESC ( B : Switch back to ASCII
+    /// - ESC ( J : Switch to JIS X 0201 Roman
+    /// - ESC ( I : Switch to JIS X 0201 Katakana
+    /// - Parameter data: Data to check
+    /// - Returns: true if ISO-2022-JP escape sequences are detected
+    private static func hasISO2022JPEscapeSequences(_ data: Data) -> Bool {
+        let length = data.count
+        var i = 0
+        
+        while i < length - 2 {
+            if data[i] == 0x1B { // ESC character
+                let next = data[i + 1]
+                let third = data[i + 2]
+                
+                // Check for common ISO-2022-JP escape sequences
+                // ESC $ B or ESC $ @ (switch to Kanji)
+                if next == 0x24 && (third == 0x42 || third == 0x40) {
+                    return true
+                }
+                // ESC ( B, ESC ( J, ESC ( I (switch to ASCII/Roman/Katakana)
+                if next == 0x28 && (third == 0x42 || third == 0x4A || third == 0x49) {
+                    return true
+                }
+            }
+            i += 1
+        }
+        
+        return false
     }
     
     /// Performs strict UTF-8 validation without BOM
