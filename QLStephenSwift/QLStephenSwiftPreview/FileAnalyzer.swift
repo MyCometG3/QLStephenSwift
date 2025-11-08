@@ -21,11 +21,10 @@ struct FileAnalyzer {
     
     // Default encoding suggestion array for ICU detection
     // Can be customized via the suggestedEncodings parameter in detection methods
-    // ICU performs statistical analysis; we only suggest UTF-8 to guide its heuristics
-    // Other encodings are handled by strict validation or fallback mechanisms
-    private static let defaultSuggestedEncodings: [String.Encoding] = [
-        .utf8  // UTF-8 only - ICU is effective at detecting UTF-8 patterns
-    ]
+    // Empty array allows ICU to use its full statistical analysis without bias
+    // This enables detection of ISO-2022-JP and other encodings that may be
+    // incorrectly detected as UTF-8 when UTF-8 is suggested
+    private static let defaultSuggestedEncodings: [String.Encoding] = []
     
     // Default fallback encoding array
     // These are tried in order if BOM, strict UTF-8, and ICU detection all fail
