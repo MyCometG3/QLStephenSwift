@@ -10,10 +10,10 @@
 			<true/>
 			<key>QLSupportedContentTypes</key>
 			<array>
+				<string>public.plain-text</string>
 				<string>public.data</string>
 				<string>public.content</string>
 				<string>public.unix-executable</string>
-				<string>public.plain-text</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>
