@@ -108,6 +108,27 @@ Simply select any text file without an extension in Finder and press the Space b
 - `public.content` - Content files
 - `public.unix-executable` - Unix executable files (displays shell scripts with shebangs)
 
+### Why Not `public.plain-text` or `public.text`?
+
+This extension intentionally does **not** declare support for `public.plain-text` or `public.text` UTIs. Here's why:
+
+**macOS Quick Look Precedence Rules:**
+- System Quick Look generators (located in `/System/Library/QuickLook/`) take precedence over third-party extensions for common UTIs like `public.plain-text` and `public.text`
+- When both system and third-party extensions support the same UTI, the **system plugin wins** for core/native file types
+- Third-party extensions are only used when the system doesn't have a strong handler for that UTI
+
+**Our Strategy:**
+- By using generic UTIs (`public.data`, `public.content`), this extension can preview files that the system doesn't handle well
+- This is particularly effective for **files without extensions** (like `README`, `Makefile`, `LICENSE`) - the core use case for this extension
+- If we declared `public.plain-text`, the system's text handler would take over for `.txt` files and most recognized text files, defeating the purpose
+
+**Result:**
+- Files without extensions → handled by this extension (via `public.data`)
+- Files with `.txt` or recognized text extensions → handled by system Quick Look
+- This division of labor ensures the extension fills the gap where the system falls short
+
+For more details on Quick Look UTI precedence, see [Apple's Quick Look documentation](https://developer.apple.com/documentation/quicklook/).
+
 ## Technical Details
 
 ### Binary Detection
