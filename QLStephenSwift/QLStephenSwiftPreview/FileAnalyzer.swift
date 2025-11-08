@@ -166,9 +166,10 @@ struct FileAnalyzer {
                 // Immediate binary detection on null byte
                 return true
             } else if byte < 0x20 {
-                // Check for control characters (excluding common whitespace)
-                // Allow: TAB(0x09), LF(0x0A), CR(0x0D), FF(0x0C)
-                if byte != 0x09 && byte != 0x0A && byte != 0x0D && byte != 0x0C {
+                // Check for control characters (excluding common whitespace and escape sequences)
+                // Allow: TAB(0x09), LF(0x0A), CR(0x0D), FF(0x0C), ESC(0x1B)
+                // ESC(0x1B) is needed for ISO-2022-JP encoding
+                if byte != 0x09 && byte != 0x0A && byte != 0x0D && byte != 0x0C && byte != 0x1B {
                     suspiciousCount += 1
                 }
             }
