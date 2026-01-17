@@ -114,7 +114,13 @@ struct FileAnalyzer {
     }
     
     static func analyze(fileURL: URL) throws -> AnalysisResult {
-        // Get file size
+        // Handle empty files
+        let fileSize = try getFileSize(for: fileURL)
+        if fileSize == 0 {
+            // Treat zero-byte files as empty UTF-8 text instead of failing
+            return AnalysisResult(isTextFile: true, encoding: .utf8, mimeType: "text/plain")
+        }
+
         // For encoding detection, we only need a sample
         guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
             throw AnalysisError.cannotOpenFile
