@@ -55,62 +55,10 @@ struct FileAnalyzer {
         .utf32LittleEndian          // UTF-32 LE without BOM (extremely rare)
     ]
     
-    enum FileType {
-        case text(encoding: String.Encoding, string: String)
-        case binary
-    }
-    
     struct AnalysisResult {
         let isTextFile: Bool
         let encoding: String.Encoding
         let mimeType: String
-    }
-    
-    static func analyzeFile(fileURL: URL) throws -> FileType {
-        // Get file size
-        let fileSize = try getFileSize(for: fileURL)
-        
-        // Determine how much data to read based on file size
-        // Note: For files ≤5MB, entire file is loaded into memory to ensure accurate
-        // encoding detection and complete text decoding. For larger files, only the
-        // first 8KB is read to minimize memory usage. This trades memory for accuracy.
-        let shouldReadFull = fileSize <= maxFullReadBytes
-        let dataToAnalyze: Data
-        
-        if shouldReadFull {
-            // Read entire file for small files (≤5MB)
-            // Memory impact: Up to 5MB per file. QuickLook typically processes one file
-            // at a time, so concurrent memory pressure is minimal.
-            guard let fullData = try? Data(contentsOf: fileURL), !fullData.isEmpty else {
-                throw AnalysisError.cannotReadFile
-            }
-            dataToAnalyze = fullData
-        } else {
-            // Read only sample for large files (>5MB)
-            // Memory impact: Fixed 8KB per file regardless of file size
-            guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
-                throw AnalysisError.cannotOpenFile
-            }
-            defer { try? fileHandle.close() }
-            
-            guard let sampleData = try? fileHandle.read(upToCount: maxBytesToCheck),
-                  !sampleData.isEmpty else {
-                throw AnalysisError.cannotReadFile
-            }
-            dataToAnalyze = sampleData
-        }
-        
-        // Apply cheap binary heuristic first
-        if isBinaryData(dataToAnalyze) {
-            return .binary
-        }
-        
-        // Detect encoding and decode
-        if let (encoding, text) = detectEncodingAndDecode(data: dataToAnalyze) {
-            return .text(encoding: encoding, string: text)
-        }
-        
-        return .binary
     }
     
     static func analyze(fileURL: URL) throws -> AnalysisResult {
