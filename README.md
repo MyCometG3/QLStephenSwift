@@ -46,7 +46,7 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
 Installable via Homebrew Cask:
 
 ```bash
-brew tap MyCometG3/qlstephenswift && brew install --cask qlstephenswift
+brew install --cask MyCometG3/qlstephenswift/qlstephenswift
 ```
 
 ### Pre-built Application
