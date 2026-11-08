@@ -33,11 +33,47 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         // Get formatting settings (line numbers, RTF, fonts, colors, etc.)
         let settings = getFormattingSettings()
         
+        // Get markdown settings
+        let markdownSettings = getMarkdownSettings(formattingSettings: settings)
+        
         // Get file size for truncation decision
         let fileManager = FileManager.default
         guard let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
               let fileSize = attributes[.size] as? Int else {
             throw PreviewError.cannotReadFile
+        }
+        
+        // Read file data (respecting maxFileSize limit)
+        let data: Data
+        if fileSize > maxFileSize {
+            // Read only up to maxFileSize
+            guard let fileHandle = try? FileHandle(forReadingFrom: fileURL),
+                  let limitedData = try? fileHandle.read(upToCount: maxFileSize) else {
+                throw PreviewError.cannotReadFile
+            }
+            try? fileHandle.close()
+            data = limitedData
+        } else {
+            // Read entire file for files within size limit
+            guard let fileData = try? Data(contentsOf: fileURL) else {
+                throw PreviewError.cannotReadFile
+            }
+            data = fileData
+        }
+        
+        // Decode text using detected encoding
+        let decodedText = String(data: data, encoding: analysisResult.encoding)
+        
+        // Check if markdown preview should be rendered
+        let isMarkdown = markdownSettings.enabled && MarkdownRenderer.isMarkdown(fileURL: fileURL, sampleText: decodedText)
+        
+        if isMarkdown, let text = decodedText {
+            let htmlContent = MarkdownRenderer.renderHTML(markdown: text, with: markdownSettings)
+            let reply = QLPreviewReply(dataOfContentType: .html, contentSize: .zero) { reply in
+                reply.stringEncoding = .utf8
+                return htmlContent.data(using: .utf8) ?? Data()
+            }
+            return reply
         }
         
         // Determine content type based on RTF rendering setting
@@ -50,29 +86,10 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         }
         
         let reply = QLPreviewReply(dataOfContentType: contentType, contentSize: .zero) { reply in
-            var data: Data
-            
-            // Truncate large files to respect maxFileSize setting
-            if fileSize > maxFileSize {
-                // Read only up to maxFileSize
-                guard let fileHandle = try? FileHandle(forReadingFrom: fileURL),
-                      let limitedData = try? fileHandle.read(upToCount: maxFileSize) else {
-                    return Data()
-                }
-                try? fileHandle.close()
-                data = limitedData
-            } else {
-                // Read entire file for files within size limit
-                guard let fileData = try? Data(contentsOf: fileURL) else {
-                    return Data()
-                }
-                data = fileData
-            }
-            
             // If line numbers or RTF rendering are enabled, format the text
             if settings.lineNumbersEnabled || settings.rtfRenderingEnabled {
                 // Decode the text using detected encoding
-                guard let text = String(data: data, encoding: analysisResult.encoding) else {
+                guard let text = decodedText else {
                     // Fallback: return original data if decoding fails
                     reply.stringEncoding = analysisResult.encoding
                     return data
@@ -158,6 +175,32 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
             contentBackgroundColorDark: AppConstants.RTF.defaultContentBackgroundColorDark,
             tabWidthMode: AppConstants.RTF.defaultTabWidthMode,
             tabWidthValue: AppConstants.RTF.defaultTabWidthValue
+        )
+    }
+    
+    /// Retrieves Markdown preview settings from shared storage
+    /// - Parameter formattingSettings: The current text formatting settings (for line numbers)
+    /// - Returns: MarkdownRenderer settings
+    private func getMarkdownSettings(formattingSettings: TextFormatter.Settings) -> MarkdownRenderer.Settings {
+        if let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) {
+            let enabled = sharedDefaults.object(forKey: AppConstants.Markdown.enabledKey) != nil
+                ? sharedDefaults.bool(forKey: AppConstants.Markdown.enabledKey)
+                : AppConstants.Markdown.defaultEnabled
+            let defaultView = sharedDefaults.string(forKey: AppConstants.Markdown.defaultViewKey)
+                ?? AppConstants.Markdown.defaultViewMode
+            return MarkdownRenderer.Settings(
+                enabled: enabled,
+                defaultView: defaultView,
+                lineNumbersEnabled: formattingSettings.lineNumbersEnabled,
+                lineSeparator: formattingSettings.lineSeparator
+            )
+        }
+        
+        return MarkdownRenderer.Settings(
+            enabled: AppConstants.Markdown.defaultEnabled,
+            defaultView: AppConstants.Markdown.defaultViewMode,
+            lineNumbersEnabled: formattingSettings.lineNumbersEnabled,
+            lineSeparator: formattingSettings.lineSeparator
         )
     }
 }

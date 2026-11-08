@@ -27,6 +27,7 @@ QLStephenSwift is a complete rewrite of the legacy [QLStephen](https://github.co
   - Western encodings (Windows-1252, MacRoman)
 - ✅ Intelligent encoding detection with priority-based fallback
 - ✅ Configurable maximum file size limit
+- ✅ **Markdown preview with toggle** (rendered preview for markdown files with instant in-preview toggle to plain text)
 - ✅ **Line number display** (optional, configurable separator)
 - ✅ **RTF rendering** with customizable fonts, colors, and tab widths
 - ✅ **Line ending preservation** (LF, CR, CRLF automatically detected and maintained)
@@ -91,10 +92,11 @@ Valid range: 102400-10485760 bytes (100KB-10MB)
 
 This setting controls preview truncation for text files only. See [File Size Limits](#file-size-limits) for details on how this interacts with binary detection.
 
-### Line Numbers and RTF Rendering
+### Markdown Preview, Line Numbers, and RTF Rendering
 
-New features for enhanced text preview:
+Features for enhanced preview:
 
+- **Markdown Preview**: Rendered preview of Markdown files (`.md`, `.markdown`, and extensionless markdown files like `README`) with an in-preview button to toggle between formatted preview and plain text.
 - **Line Numbers**: Display line numbers with configurable separator (space, colon, pipe, tab)
 - **RTF Rendering**: Rich text output with customizable fonts, colors, and tab widths
 
@@ -111,13 +113,14 @@ OLD_SIZE=$(defaults read com.whomwah.quicklookstephen maxFileSize 2>/dev/null)
 
 ## Usage
 
-Simply select any text file without an extension in Finder and press the Space bar to preview it with QuickLook.
+Simply select any text file without an extension (or Markdown file) in Finder and press the Space bar to preview it with QuickLook.
 
 ## Supported Content Types
 
 - `public.data` - Generic data files
 - `public.content` - Content files
 - `public.unix-executable` - Unix executable files (displays shell scripts with shebangs)
+- `net.daringfireball.markdown` - Markdown documents (`.md`, `.markdown`)
 
 ### Why Not `public.plain-text` or `public.text`?
 

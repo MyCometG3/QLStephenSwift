@@ -20,6 +20,10 @@ struct ContentView: View {
     @State private var lineNumbersEnabled: Bool = AppConstants.LineNumbers.defaultEnabled
     @State private var lineSeparator: String = AppConstants.LineNumbers.defaultSeparator
     
+    // Markdown preview settings
+    @State private var markdownPreviewEnabled: Bool = AppConstants.Markdown.defaultEnabled
+    @State private var markdownDefaultView: String = AppConstants.Markdown.defaultViewMode
+    
     // RTF rendering settings
     @State private var rtfRenderingEnabled: Bool = AppConstants.RTF.defaultEnabled
     
@@ -78,6 +82,51 @@ struct ContentView: View {
                         Text("KB")
                         
                         Spacer()
+                    }
+                }
+                .padding(.horizontal)
+                
+                // Markdown Preview Settings
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Markdown Preview")
+                            .font(.headline)
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.secondary)
+                            .help("Renders markdown files (.md, README, etc.) with an interactive toggle in the preview to switch between formatted preview and plain text")
+                    }
+                    
+                    HStack {
+                        Text("Enable Markdown Preview:")
+                            .frame(width: 170, alignment: .trailing)
+                        
+                        Toggle("", isOn: $markdownPreviewEnabled)
+                            .toggleStyle(.switch)
+                            .onChange(of: markdownPreviewEnabled) { _, newValue in
+                                saveMarkdownPreviewEnabled(newValue)
+                            }
+                        
+                        Spacer()
+                    }
+                    
+                    if markdownPreviewEnabled {
+                        HStack {
+                            Text("Default View:")
+                                .frame(width: 170, alignment: .trailing)
+                            
+                            Picker("", selection: $markdownDefaultView) {
+                                ForEach(AppConstants.Markdown.ViewMode.allCases, id: \.self) { mode in
+                                    Text(mode.displayName).tag(mode.rawValue)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .frame(width: 240)
+                            .onChange(of: markdownDefaultView) { _, newValue in
+                                saveMarkdownDefaultView(newValue)
+                            }
+                            
+                            Spacer()
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -305,6 +354,19 @@ struct ContentView: View {
         }
         maxFileSizeKBText = String(maxFileSize / AppConstants.FileSize.bytesPerKB)
         
+        // Load markdown preview settings
+        if sharedDefaults.object(forKey: AppConstants.Markdown.enabledKey) != nil {
+            markdownPreviewEnabled = sharedDefaults.bool(forKey: AppConstants.Markdown.enabledKey)
+        } else {
+            markdownPreviewEnabled = AppConstants.Markdown.defaultEnabled
+        }
+        
+        if let defaultView = sharedDefaults.string(forKey: AppConstants.Markdown.defaultViewKey) {
+            markdownDefaultView = defaultView
+        } else {
+            markdownDefaultView = AppConstants.Markdown.defaultViewMode
+        }
+        
         // Load line numbers settings
         lineNumbersEnabled = sharedDefaults.bool(forKey: AppConstants.LineNumbers.enabledKey)
         if let separator = sharedDefaults.string(forKey: AppConstants.LineNumbers.separatorKey) {
@@ -404,6 +466,22 @@ struct ContentView: View {
             // Restore previous value if not a number
             maxFileSizeKBText = String(maxFileSize / AppConstants.FileSize.bytesPerKB)
         }
+    }
+    
+    /// Saves markdown preview enabled setting to shared storage
+    private func saveMarkdownPreviewEnabled(_ enabled: Bool) {
+        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
+            return
+        }
+        sharedDefaults.set(enabled, forKey: AppConstants.Markdown.enabledKey)
+    }
+    
+    /// Saves markdown default view mode setting to shared storage
+    private func saveMarkdownDefaultView(_ mode: String) {
+        guard let sharedDefaults = UserDefaults(suiteName: AppConstants.appGroupID) else {
+            return
+        }
+        sharedDefaults.set(mode, forKey: AppConstants.Markdown.defaultViewKey)
     }
     
     /// Saves line numbers enabled setting to shared storage
