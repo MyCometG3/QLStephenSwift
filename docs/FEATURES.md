@@ -1,6 +1,6 @@
-# Line Numbers and RTF Rendering Features
+# Markdown Preview, Line Numbers, and RTF Rendering Features
 
-This document describes the line number display and RTF rendering features in QLStephenSwift.
+This document describes the Markdown preview, line number display, and RTF rendering features in QLStephenSwift.
 
 ## Feature A: Line Number Display
 
@@ -151,29 +151,59 @@ When RTF rendering is enabled and you copy text from the preview:
 ### Backward Compatibility
 When RTF rendering is disabled, the preview uses the original plain text rendering with the detected encoding, exactly as before.
 
+## Feature C: Markdown Preview with Toggle
+
+### Overview
+Render Markdown files as formatted HTML with an interactive floating button in the preview window to toggle instantly between the rendered Markdown view and the raw plain text view.
+
+### Supported Files
+- Files with Markdown extensions: `.md`, `.markdown`, `.mdown`, `.mkd`, `.mkdn`
+- Extensionless Markdown documentation files (e.g., `README`, `CHANGELOG`, `CONTRIBUTING`, `TODO`)
+- Files declared with the `net.daringfireball.markdown` UTI
+
+### Settings
+
+#### Enable Markdown Preview
+- **UI Control**: Toggle switch in "Markdown Preview" section
+- **Default**: On (enabled)
+- When enabled, detected Markdown files are rendered as styled HTML. When disabled, Markdown files fall back to plain text or RTF rendering.
+
+#### Default View Mode
+- **UI Control**: Segmented picker in "Markdown Preview" section ("Rendered Preview" vs "Plain Text")
+- **Default**: Rendered Preview
+- Determines which view is shown initially when opening a Quick Look preview:
+  - `Rendered Preview`: Shows formatted Markdown with a "Plain Text" toggle button
+  - `Plain Text`: Shows raw text with a "Markdown Preview" toggle button
+
+#### In-Preview Interactive Toggle
+- A sleek floating button in the upper right corner allows toggling between the rendered Markdown and raw plain text views with a single click.
+- **Keyboard Shortcuts**: Pressing `m`, `p`, or `t` inside the preview window also toggles the view.
+- When toggled to plain text, line numbers are displayed if "Show Line Numbers" is enabled in settings.
+
+#### Advanced Configuration via defaults Command
+
+```bash
+# Enable or disable Markdown preview
+defaults write group.com.mycometg3.qlstephenswift markdownPreviewEnabled -bool true
+
+# Set default view mode ("rendered" or "plain")
+defaults write group.com.mycometg3.qlstephenswift markdownDefaultView "rendered"
+```
+
 ## Feature Interaction
 
-The two features can be used independently or together:
+The features work together cohesively:
 
-1. **Line Numbers OFF, RTF OFF** (default)
-   - Original behavior, plain text with detected encoding
+1. **Markdown Files (`.md`, `README`, etc.)**:
+   - If Markdown Preview is ON (default):
+     - Opens in the configured default view mode (Rendered or Plain Text).
+     - The interactive toggle button allows switching between Rendered and Plain Text at any time.
+     - In Plain Text view, line numbers are displayed if "Show Line Numbers" is enabled.
+   - If Markdown Preview is OFF:
+     - Uses standard RTF or plain text rendering according to RTF and Line Number settings.
 
-2. **Line Numbers ON, RTF OFF**
-   - Plain text with line numbers prefixed to each line
-   - Uses UTF-8 encoding
-
-3. **Line Numbers OFF, RTF ON**
-   - RTF rendering with styled text only (no line numbers)
-   - Content uses customizable font/color attributes
-   - Tab width can be customized
-   - Colors automatically adapt to Light/Dark mode
-
-4. **Line Numbers ON, RTF ON**
-   - RTF rendering with line numbers
-   - Line numbers use separate font/color attributes (configurable via defaults)
-   - Content uses customizable font/color attributes (configurable via UI)
-   - Tab width can be customized
-   - Colors automatically adapt to Light/Dark mode
+2. **Non-Markdown Text Files (e.g., `Makefile`, shell scripts, plain text)**:
+   - Line numbers and RTF rendering apply as configured.
 
 ## Examples
 

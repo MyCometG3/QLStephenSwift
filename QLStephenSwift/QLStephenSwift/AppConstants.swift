@@ -125,4 +125,33 @@ enum AppConstants {
         static let defaultTabWidthMode = TabWidthMode.characters.rawValue
         static let defaultTabWidthValue: Double = 4.0
     }
+    
+    /// Markdown preview settings
+    enum Markdown {
+        /// UserDefaults key for markdown preview enabled setting
+        static let enabledKey = "markdownPreviewEnabled"
+        
+        /// UserDefaults key for default view mode setting
+        static let defaultViewKey = "markdownDefaultView"
+        
+        /// Default value for markdown preview enabled
+        static let defaultEnabled = true
+        
+        /// View mode options: rendered markdown or raw plain text
+        enum ViewMode: String, CaseIterable {
+            case rendered = "rendered"
+            case plain = "plain"
+            
+            var displayName: String {
+                switch self {
+                case .rendered:
+                    return "Rendered Preview"
+                case .plain:
+                    return "Plain Text"
+                }
+            }
+        }
+        
+        static let defaultViewMode = ViewMode.rendered.rawValue
+    }
 }
